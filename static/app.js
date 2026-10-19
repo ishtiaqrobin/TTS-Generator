@@ -91,15 +91,58 @@ const playerMeta = document.getElementById('player-meta');
 const btnDownloadMp3 = document.getElementById('btn-download-mp3');
 const btnDownloadSrt = document.getElementById('btn-download-srt');
 
+const themeToggleBtn = document.getElementById('theme-toggle');
+const iconSun = document.getElementById('icon-sun');
+const iconMoon = document.getElementById('icon-moon');
+const themeText = document.getElementById('theme-text');
+
 // Initialize Application
 document.addEventListener('DOMContentLoaded', async () => {
+  initTheme();
   setupEventListeners();
   await loadVoiceCatalog();
   updateTextStats();
 });
 
+// Theme Management (Dark Mode & Light Mode)
+function initTheme() {
+  const savedTheme = localStorage.getItem('storyteller-theme') || 'dark';
+  applyTheme(savedTheme);
+}
+
+function toggleTheme() {
+  const newTheme = STATE.theme === 'dark' ? 'light' : 'dark';
+  applyTheme(newTheme);
+}
+
+function applyTheme(theme) {
+  STATE.theme = theme;
+  document.documentElement.setAttribute('data-theme', theme);
+
+  if (theme === 'light') {
+    document.documentElement.classList.add('light');
+    document.documentElement.classList.remove('dark');
+    iconSun.classList.remove('hidden');
+    iconMoon.classList.add('hidden');
+    themeText.textContent = 'Light';
+  } else {
+    document.documentElement.classList.add('dark');
+    document.documentElement.classList.remove('light');
+    iconMoon.classList.remove('hidden');
+    iconSun.classList.add('hidden');
+    themeText.textContent = 'Dark';
+  }
+
+  localStorage.setItem('storyteller-theme', theme);
+}
+
 // Event Listeners
 function setupEventListeners() {
+  // Theme Toggle Button
+  if (themeToggleBtn) {
+    themeToggleBtn.addEventListener('click', toggleTheme);
+  }
+
   // Engine Tab Switching
   tabEdge.addEventListener('click', () => switchEngine('edge'));
   tabKokoro.addEventListener('click', () => switchEngine('kokoro'));
