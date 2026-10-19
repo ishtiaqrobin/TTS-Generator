@@ -1,0 +1,27 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Output audio and subtitles
+output/*
+!output/.gitkeep
+
+# Temporary generation files
+temp_*
+*.mp3
+*.wav
+*.srt
+
+# Virtual Environments
+venv/
+.venv/
+env/
+ENV/
+
+# OS and Editor files
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
