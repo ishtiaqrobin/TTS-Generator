@@ -1,59 +1,62 @@
 # TTS-Generator
 
-🎙️ **Storyteller Studio** — A modern, hybrid Text-to-Speech (TTS) web application specifically engineered for long-form narrative and storytelling. Runs 100% locally on your machine with zero cloud subscription fees.
+🎙️ **Storyteller Studio** — A modern, multi-engine AI Text-to-Speech (TTS) studio engineered specifically for long-form narrative storytelling, character dialogue, and zero-shot voice cloning. Runs 100% locally on your machine with zero subscription fees.
 
 ---
 
-## ✨ Features
+## ✨ 4 State-of-the-Art TTS Engines
 
-- **Hybrid Engine Switcher**:
-  - ⚡ **Edge-TTS (Neural Cloud)**: Lightning-fast rendering powered by Microsoft's neural voices. Supports expressive SSML emotion styles (`whispering`, `terrified`, `sad`, `cheerful`, `empathetic`, `angry`, `narration-relaxed`).
-  - 🤖 **Kokoro-82M (Local AI Model)**: State-of-the-art open-source 82M parameter model running locally on CPU/GPU. Delivers studio-grade human cadence, natural rhythm, and breath dynamics.
-- **Long-Form Narrative Engine (30+ Minutes Ready)**:
-  - Smart paragraph & sentence chunker that prevents timeouts and disconnections.
-  - Asynchronous background batch synthesis with real-time percentage and section progress.
-  - Seamless FFmpeg audio stitching with zero pops, clicks, or cuts.
-- **Narrative Fine-Tuning**:
-  - **Dramatic Pause Slider**: Add customizable dramatic pauses (`100ms` – `1500ms`) at paragraph breaks.
-  - **Emotion Intensity Slider**: Adjust expressive emotional degree (`0.5x` – `2.0x`).
-  - **Speed & Pitch Controls**: Modulate voice rate and pitch (deep bass to high pitch).
-- **Subtitles & Export**:
-  - Synchronized `.SRT` subtitle generation ready for YouTube or video editing.
-  - Direct `.MP3` master audio download.
-- **Modern Minimal UI**:
-  - ShadcnUI-inspired minimalist dark theme (Deep Zinc `#09090b`).
-  - Instant 3-second audition preview before generating full audio.
-  - Persistent bottom master audio player with scrubber and variable speed controls (`1x`, `1.25x`, `1.5x`).
+Compare audio quality, rhythm, and expressive styles side-by-side across 4 distinct AI engines:
+
+1. ⚡ **Edge-TTS (Neural Cloud)**:
+   - Ultra-fast synthesis with Microsoft's neural voices.
+   - Rich SSML emotion styles: `whispering`, `terrified`, `sad`, `cheerful`, `empathetic`, `angry`, `narration-relaxed`.
+   - Dynamic pitch & speed modulation.
+2. 🤖 **Kokoro-82M (Local Neural AI)**:
+   - State-of-the-art open-weights 82M model running locally on CPU/GPU.
+   - Warm, studio-grade human cadence, natural rhythm, and breath dynamics.
+   - American & British literary narrative voices.
+3. 💬 **ChatTTS (Conversational & Expressive Storytelling)**:
+   - Specialized in conversational rhythm, laughter, sighs, and natural pauses.
+   - **Interactive Story Tokens**: Click to inject `[laugh]` (laughter) and `[lbreak]` (natural dramatic breath pause) directly into the story text.
+   - **Speaker Seeds**: Reproducible unique narrator voices with randomizer (`🎲 Randomize Seed`).
+   - Expressiveness controls: **Oral Breath** level and **Laugh Tendency**.
+4. 🎙️ **F5-TTS (Zero-Shot Voice Cloning)**:
+   - Non-autoregressive Flow Matching model with continuous vocoder (Vocos).
+   - Instant voice cloning from a 5–15 second audio reference without retraining.
+   - Bundled preset voices (`David Nature`, `Emma British`, `Basic English`, `Basic Mandarin`) + custom file upload.
+   - Customizable ODE sampling steps (`nfe_step`) for optimal balance between speed and fidelity.
 
 ---
 
-## 🎭 Featured Character Archetypes
+## 🎨 Dual Theme UI
+- 🌙 **Slate Dark Mode**: Warm, sleek dark theme inspired by slate-charcoal tones (`#38393a`) and pill-shaped interactive tabs.
+- ☀️ **Modern Light Mode**: High-contrast, clean minimalist aesthetic in crisp white, black, and crimson red (`#dc2626`).
+- Automatic theme preference persistence in browser `localStorage`.
 
-### Edge-TTS Voices
-- **Guy** — The Master Storyteller (Expressive with 8 emotion styles)
-- **Christopher** — Deep Baritone & Audiobook Narrator (Documentaries, Sci-Fi)
-- **Aria** — Emotional Protagonist (Drama, Psychological Thrillers)
-- **Davis** — Noir, Crime & Dark Horror Narrator
-- **Ryan** — Classic British Gentleman
-- **Sonia** — Enchanting & Literary British Narrator
-- **Jenny** — Soothing Bedtime Storyteller
+---
 
-### Kokoro-82M Voices
-- **Heart (`af_heart`)** — Ranked #1 open-source voice for warm, human-like narration
-- **Michael (`am_michael`)** — Natural, rich American male baritone
-- **Adam (`am_adam`)** — Deep, commanding, and grounded storyteller
-- **George (`bm_george`)** — Prestigious British audiobook reader
-- **Lewis (`bm_lewis`)** — Refined British fantasy & lore narrator
-- **Emma (`bf_emma`)** — Victorian, gothic, and literary female delivery
+## 🎭 Engine Comparison & Voices
+
+| Engine | Architecture | Best For | Emotion / Control | Clone Support |
+| :--- | :--- | :--- | :--- | :--- |
+| **Edge-TTS** | Neural SSML Cloud | Fast chapters, 30+ min rendering | 8 SSML Emotions, Pitch, Speed | Preset library |
+| **Kokoro-82M** | StyleTTS2 (82M) | Audiobooks & literary narratives | Human cadence, Speed modulation | Preset library |
+| **ChatTTS** | Generative LLM | Dialogue, comedy, expressive pauses | `[laugh]`, `[lbreak]`, Oral breath | Seed-based |
+| **F5-TTS** | Flow Matching ODE | Zero-shot voice cloning & narration | Reference audio cloning, Speed | Custom audio upload |
 
 ---
 
 ## 🛠️ Tech Stack
 
 - **Backend**: Python 3.10+, Flask, Flask-CORS
-- **Audio Synthesis**: `edge-tts` (7.3.1+), `kokoro` (0.9.4+), `soundfile`, `torch`
-- **Audio Processing**: FFmpeg & FFprobe (concatenation & metadata)
-- **Frontend**: HTML5, Modern Vanilla CSS (ShadcnUI Dark tokens), ES6+ JavaScript
+- **AI Engines**:
+  - `edge-tts` (7.3.1+)
+  - `kokoro` (0.9.4+)
+  - `ChatTTS` (0.2.5+)
+  - `f5-tts` (1.1.22+)
+- **Audio Processing**: FFmpeg & FFprobe (seamless concatenation & metadata), `soundfile`, `torch`
+- **Frontend**: Modern Vanilla HTML5 / CSS3 / ES6+ JavaScript (zero external framework bloat)
 
 ---
 

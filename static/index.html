@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en" class="dark" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Storyteller Studio — Local AI & Neural TTS Generator</title>
+  <title>Storyteller Studio — Multi-Engine AI TTS Comparison Suite</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -23,32 +23,38 @@
         </div>
         <div>
           <div class="brand-title">Storyteller Studio</div>
-          <div class="brand-subtitle">Local Long-Form Narrative TTS</div>
+          <div class="brand-subtitle">Multi-Engine TTS & Voice Cloning Suite</div>
         </div>
       </div>
 
-      <!-- Engine Selector Tabs (Shadcn style) -->
+      <!-- 4-Engine Tabs -->
       <div class="engine-tabs-container">
         <div class="engine-tabs" role="tablist">
           <button id="tab-edge" class="engine-tab active" data-engine="edge" role="tab">
-            <span class="tab-indicator"></span>
-            <span class="tab-title">Edge-TTS (Expressive SSML)</span>
-            <span class="tab-badge">Cloud Neural</span>
+            <span class="tab-title">⚡ Edge-TTS</span>
+            <span class="tab-badge">Cloud SSML</span>
           </button>
           <button id="tab-kokoro" class="engine-tab" data-engine="kokoro" role="tab">
-            <span class="tab-indicator"></span>
-            <span class="tab-title">Kokoro-82M</span>
-            <span class="tab-badge local-badge">Local AI</span>
+            <span class="tab-title">🤖 Kokoro-82M</span>
+            <span class="tab-badge local-badge">Local 82M</span>
+          </button>
+          <button id="tab-chattts" class="engine-tab" data-engine="chattts" role="tab">
+            <span class="tab-title">💬 ChatTTS</span>
+            <span class="tab-badge chat-badge">Conversational</span>
+          </button>
+          <button id="tab-f5" class="engine-tab" data-engine="f5" role="tab">
+            <span class="tab-title">🎙️ F5-TTS</span>
+            <span class="tab-badge clone-badge">Voice Clone</span>
           </button>
         </div>
       </div>
 
       <div class="header-status">
         <button id="theme-toggle" class="theme-toggle-btn" title="Switch Theme (Dark / Light)">
-          <svg id="icon-sun" class="theme-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="icon-sun" class="theme-icon hidden" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/>
           </svg>
-          <svg id="icon-moon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg id="icon-moon" class="theme-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/>
           </svg>
           <span id="theme-text" class="theme-text">Dark</span>
@@ -67,7 +73,7 @@
         <div class="card-header">
           <div class="card-title-group">
             <h2 class="card-title">Story Script</h2>
-            <p class="card-description">Paste your narrative or book chapter. Supports long-form scripts up to 30+ minutes.</p>
+            <p class="card-description">Write or paste your story. Supports long-form narrative up to 30+ minutes.</p>
           </div>
           <div class="samples-dropdown">
             <button class="btn btn-secondary btn-sm" id="btn-sample-trigger">
@@ -80,6 +86,13 @@
               <button class="dropdown-item" data-sample="fantasy">The Whispering Forest (Dark Fantasy)</button>
             </div>
           </div>
+        </div>
+
+        <!-- ChatTTS Narrative Tokens Bar (Visible when ChatTTS is active) -->
+        <div id="chattts-token-bar" class="token-bar hidden">
+          <span class="token-bar-label">Insert Chat Expressions:</span>
+          <button type="button" class="token-btn" data-token="[laugh]">😄 + [laugh]</button>
+          <button type="button" class="token-btn" data-token="[lbreak]">⏸️ + [lbreak]</button>
         </div>
 
         <div class="editor-body">
@@ -127,17 +140,76 @@ Over many a quaint and curious volume of forgotten lore..."></textarea>
         <div class="card-header">
           <div class="card-title-group">
             <h2 class="card-title">Character & Voice Studio</h2>
-            <p class="card-description" id="engine-desc">Select the storyteller archetype and fine-tune emotion, pitch, and pacing.</p>
+            <p class="card-description" id="engine-desc">Select voice archetype and fine-tune emotion, pitch, and pacing.</p>
           </div>
         </div>
 
         <!-- Voice Selection Grid -->
-        <div class="section-label">SELECT NARRATOR VOICE</div>
+        <div class="section-label" id="voice-grid-label">SELECT NARRATOR VOICE</div>
         <div class="voice-grid" id="voice-grid">
           <!-- Voice cards injected via JS -->
         </div>
 
-        <!-- Emotion / Mood Controls (Edge-TTS only or general) -->
+        <!-- ChatTTS Special Controls (Custom Seed, Oral, Laugh) -->
+        <div id="chattts-controls" class="custom-control-box hidden">
+          <div class="section-label">CHATTTS ADVANCED CONTROLS</div>
+          <div class="seed-control-row">
+            <div class="seed-input-group">
+              <label for="chat-seed-input" class="option-label">Speaker Seed (Integer):</label>
+              <div class="seed-input-wrap">
+                <input type="number" id="chat-seed-input" value="42" min="1" max="999999">
+                <button type="button" id="btn-random-seed" class="btn btn-secondary btn-sm">🎲 Random</button>
+              </div>
+            </div>
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-title">Stability vs Expressiveness</span>
+                <span id="temp-val" class="slider-val">0.3</span>
+              </div>
+              <input type="range" id="temp-slider" min="0.1" max="1.0" step="0.05" value="0.3">
+            </div>
+          </div>
+          <div class="chat-sliders-row">
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-title">Oral Breathiness</span>
+                <span id="oral-val" class="slider-val">2</span>
+              </div>
+              <input type="range" id="oral-slider" min="0" max="9" step="1" value="2">
+            </div>
+            <div class="slider-group">
+              <div class="slider-header">
+                <span class="slider-title">Laugh Tendency</span>
+                <span id="laugh-val" class="slider-val">0</span>
+              </div>
+              <input type="range" id="laugh-slider" min="0" max="2" step="1" value="0">
+            </div>
+          </div>
+        </div>
+
+        <!-- F5-TTS Voice Cloning Custom Audio Upload -->
+        <div id="f5tts-controls" class="custom-control-box hidden">
+          <div class="section-label">ZERO-SHOT VOICE CLONING (CUSTOM REFERENCE)</div>
+          <div class="f5-upload-area">
+            <div class="f5-upload-group">
+              <label class="option-label">Upload Custom Voice Sample (.wav, .mp3):</label>
+              <input type="file" id="f5-file-input" accept="audio/*">
+            </div>
+            <div class="f5-ref-text-group">
+              <label for="f5-ref-text-input" class="option-label">Reference Transcript (What does the audio say?):</label>
+              <input type="text" id="f5-ref-text-input" placeholder="Transcript of the reference sample..." value="Some call me nature, others call me mother nature.">
+            </div>
+          </div>
+          <div class="slider-group" style="margin-top: 8px;">
+            <div class="slider-header">
+              <span class="slider-title">Diffusion Quality Steps (NFE)</span>
+              <span id="nfe-val" class="slider-val">32 steps</span>
+            </div>
+            <input type="range" id="nfe-slider" min="16" max="64" step="8" value="32">
+          </div>
+        </div>
+
+        <!-- Emotion / Mood Controls (Edge-TTS) -->
         <div id="emotion-section" class="control-block">
           <div class="section-label">EMOTION & NARRATIVE TONE</div>
           <div class="emotion-pills" id="emotion-pills">
@@ -147,7 +219,7 @@ Over many a quaint and curious volume of forgotten lore..."></textarea>
 
         <!-- Fine-Tuning Sliders -->
         <div class="sliders-grid">
-          <!-- Emotion Intensity (if supported) -->
+          <!-- Emotion Intensity (Edge-TTS) -->
           <div class="slider-group" id="intensity-group">
             <div class="slider-header">
               <span class="slider-title">Expressiveness Degree</span>
@@ -156,8 +228,8 @@ Over many a quaint and curious volume of forgotten lore..."></textarea>
             <input type="range" id="intensity-slider" min="0.5" max="2.0" step="0.1" value="1.2">
           </div>
 
-          <!-- Speech Rate -->
-          <div class="slider-group">
+          <!-- Speech Rate (Speed) -->
+          <div class="slider-group" id="speed-group">
             <div class="slider-header">
               <span class="slider-title">Pacing & Speed</span>
               <span id="speed-val" class="slider-val">Normal (0%)</span>
@@ -165,7 +237,7 @@ Over many a quaint and curious volume of forgotten lore..."></textarea>
             <input type="range" id="speed-slider" min="-30" max="30" step="2" value="0">
           </div>
 
-          <!-- Voice Pitch (Deep/High) -->
+          <!-- Voice Pitch (Edge-TTS) -->
           <div class="slider-group" id="pitch-group">
             <div class="slider-header">
               <span class="slider-title">Pitch (Deep Bass / High)</span>
@@ -194,7 +266,7 @@ Over many a quaint and curious volume of forgotten lore..."></textarea>
       </section>
     </main>
 
-    <!-- Progress Overlay Card (Shown during long generation) -->
+    <!-- Progress Overlay Card -->
     <div id="progress-card" class="progress-card hidden">
       <div class="progress-header">
         <div class="progress-info">

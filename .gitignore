@@ -11,6 +11,7 @@ output/*
 temp_*
 *.mp3
 *.wav
+!ref_audio/*.wav
 *.srt
 
 # Virtual Environments

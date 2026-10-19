@@ -1,7 +1,11 @@
 edge-tts>=7.3.1
 kokoro>=0.9.4
+ChatTTS>=0.2.5
+f5-tts>=1.1.22
 soundfile>=0.12.1
 Flask>=3.0.0
 Flask-Cors>=4.0.0
 numpy>=1.26.0
 torch>=2.0.0
+torchaudio>=2.0.0
+

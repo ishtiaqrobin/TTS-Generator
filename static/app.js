@@ -1,21 +1,24 @@
 /**
- * Storyteller Studio — Frontend Application Logic
- * Supports Hybrid Engine (Edge-TTS & Kokoro-TTS), Voice Selection,
- * Live Pacing & Pitch Fine-tuning, Progress Tracking, and Master Audio Player.
+ * Storyteller Studio — Multi-Engine Suite (Edge-TTS, Kokoro-82M, ChatTTS, F5-TTS)
+ * Supports 4-Engine Switching, Custom Seed, Voice Cloning, Tokens, and Dual Theme.
  */
 
 const STATE = {
-  engine: 'edge', // 'edge' | 'kokoro'
+  theme: 'dark',
+  engine: 'edge', // 'edge' | 'kokoro' | 'chattts' | 'f5'
   edgeVoices: [],
   kokoroVoices: [],
+  chatttsVoices: [],
+  f5ttsVoices: [],
   selectedVoice: null,
   selectedStyle: 'narration-relaxed',
+  f5CustomAudioPath: null,
   isGenerating: false,
   taskId: null,
   pollTimer: null,
 };
 
-// Sample Stories for instant auditioning & storytelling tests
+// Sample Stories
 const SAMPLES = {
   horror: `The grandfather clock in Blackwood Manor struck midnight with a dull, echoing toll that vibrated through the floorboards. Outside, the autumn wind howled against the leaded glass windows, driving sheets of rain into the dark spruce forest.
 
@@ -39,12 +42,35 @@ Suddenly, a flock of white ravens burst from the bell tower, scattering into the
 // DOM Elements
 const tabEdge = document.getElementById('tab-edge');
 const tabKokoro = document.getElementById('tab-kokoro');
+const tabChattts = document.getElementById('tab-chattts');
+const tabF5 = document.getElementById('tab-f5');
+
 const voiceGrid = document.getElementById('voice-grid');
+const voiceGridLabel = document.getElementById('voice-grid-label');
 const emotionSection = document.getElementById('emotion-section');
 const emotionPills = document.getElementById('emotion-pills');
 const intensityGroup = document.getElementById('intensity-group');
 const pitchGroup = document.getElementById('pitch-group');
 const engineDesc = document.getElementById('engine-desc');
+
+// ChatTTS specific elements
+const chatttsTokenBar = document.getElementById('chattts-token-bar');
+const chatttsControls = document.getElementById('chattts-controls');
+const chatSeedInput = document.getElementById('chat-seed-input');
+const btnRandomSeed = document.getElementById('btn-random-seed');
+const tempSlider = document.getElementById('temp-slider');
+const tempVal = document.getElementById('temp-val');
+const oralSlider = document.getElementById('oral-slider');
+const oralVal = document.getElementById('oral-val');
+const laughSlider = document.getElementById('laugh-slider');
+const laughVal = document.getElementById('laugh-val');
+
+// F5-TTS specific elements
+const f5ttsControls = document.getElementById('f5tts-controls');
+const f5FileInput = document.getElementById('f5-file-input');
+const f5RefTextInput = document.getElementById('f5-ref-text-input');
+const nfeSlider = document.getElementById('nfe-slider');
+const nfeVal = document.getElementById('nfe-val');
 
 const storyText = document.getElementById('story-text');
 const wordCountEl = document.getElementById('word-count');
@@ -104,7 +130,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateTextStats();
 });
 
-// Theme Management (Dark Mode & Light Mode)
+// Theme Management
 function initTheme() {
   const savedTheme = localStorage.getItem('storyteller-theme') || 'dark';
   applyTheme(savedTheme);
@@ -136,30 +162,70 @@ function applyTheme(theme) {
   localStorage.setItem('storyteller-theme', theme);
 }
 
-// Event Listeners
+// Event Listeners Setup
 function setupEventListeners() {
-  // Theme Toggle Button
   if (themeToggleBtn) {
     themeToggleBtn.addEventListener('click', toggleTheme);
   }
 
-  // Engine Tab Switching
+  // Engine Switchers
   tabEdge.addEventListener('click', () => switchEngine('edge'));
   tabKokoro.addEventListener('click', () => switchEngine('kokoro'));
+  tabChattts.addEventListener('click', () => switchEngine('chattts'));
+  tabF5.addEventListener('click', () => switchEngine('f5'));
 
-  // Text Stats
+  // Story Text Updates
   storyText.addEventListener('input', updateTextStats);
 
-  // Sliders Live Values
+  // Quick Insert Tokens for ChatTTS
+  document.querySelectorAll('.token-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      const token = e.target.dataset.token;
+      insertTokenAtCursor(token);
+    });
+  });
+
+  // Random Seed Button for ChatTTS
+  btnRandomSeed.addEventListener('click', () => {
+    const randomSeed = Math.floor(Math.random() * 99999) + 1;
+    chatSeedInput.value = randomSeed;
+  });
+
+  // Custom Reference Audio Upload for F5-TTS
+  f5FileInput.addEventListener('change', async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+      const res = await fetch('/api/upload_reference', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (data.success) {
+        STATE.f5CustomAudioPath = data.audio_path;
+        alert(`Reference sample "${file.name}" uploaded successfully! Now type what it says in the transcript box.`);
+      } else {
+        alert('Upload Error: ' + (data.error || 'Failed to upload audio'));
+      }
+    } catch (err) {
+      console.error('File upload error:', err);
+      alert('Error uploading file to local server.');
+    }
+  });
+
+  // Sliders Live Updates
   pauseSlider.addEventListener('input', (e) => {
     pauseVal.textContent = `${e.target.value}ms`;
   });
 
   speedSlider.addEventListener('input', (e) => {
     const val = parseInt(e.target.value);
-    if (STATE.engine === 'kokoro') {
-      // Map -30..30 to 0.7x..1.5x
-      const factor = (1.0 + (val / 100) * 1.2).toFixed(2);
+    if (STATE.engine === 'kokoro' || STATE.engine === 'f5') {
+      const factor = (1.0 + (val / 100) * 1.0).toFixed(2);
       speedVal.textContent = `${factor}x`;
     } else {
       speedVal.textContent = val === 0 ? 'Normal (0%)' : `${val > 0 ? '+' : ''}${val}%`;
@@ -175,7 +241,23 @@ function setupEventListeners() {
     intensityVal.textContent = `${parseFloat(e.target.value).toFixed(1)}x`;
   });
 
-  // Sample Stories Dropdown
+  tempSlider.addEventListener('input', (e) => {
+    tempVal.textContent = parseFloat(e.target.value).toFixed(2);
+  });
+
+  oralSlider.addEventListener('input', (e) => {
+    oralVal.textContent = e.target.value;
+  });
+
+  laughSlider.addEventListener('input', (e) => {
+    laughVal.textContent = e.target.value;
+  });
+
+  nfeSlider.addEventListener('input', (e) => {
+    nfeVal.textContent = `${e.target.value} steps`;
+  });
+
+  // Samples Dropdown
   btnSampleTrigger.addEventListener('click', (e) => {
     e.stopPropagation();
     samplesMenu.classList.toggle('show');
@@ -199,7 +281,7 @@ function setupEventListeners() {
   btnPreview.addEventListener('click', auditionVoicePreview);
   btnGenerate.addEventListener('click', generateFullStory);
 
-  // Master Audio Player Controls
+  // Player Controls
   btnPlayPause.addEventListener('click', togglePlayPause);
   audioElement.addEventListener('timeupdate', updateAudioProgress);
   audioElement.addEventListener('loadedmetadata', () => {
@@ -224,7 +306,20 @@ function setupEventListeners() {
   });
 }
 
-// Fetch Voices from Backend
+// Insert Token into Story Script Textarea
+function insertTokenAtCursor(token) {
+  const startPos = storyText.selectionStart;
+  const endPos = storyText.selectionEnd;
+  const originalText = storyText.value;
+
+  storyText.value = originalText.substring(0, startPos) + " " + token + " " + originalText.substring(endPos);
+  storyText.focus();
+  storyText.selectionStart = startPos + token.length + 2;
+  storyText.selectionEnd = startPos + token.length + 2;
+  updateTextStats();
+}
+
+// Fetch Voices Catalog from Server
 async function loadVoiceCatalog() {
   try {
     const res = await fetch('/api/voices');
@@ -232,49 +327,94 @@ async function loadVoiceCatalog() {
     if (data.success) {
       STATE.edgeVoices = data.edge_voices || [];
       STATE.kokoroVoices = data.kokoro_voices || [];
+      STATE.chatttsVoices = data.chattts_voices || [];
+      STATE.f5ttsVoices = data.f5tts_voices || [];
       renderVoiceGrid();
     }
   } catch (err) {
-    console.error('Failed to load voices:', err);
+    console.error('Failed to load voice catalog:', err);
   }
 }
 
-// Switch between Edge-TTS and Kokoro-TTS
+// Switch between the 4 Engines
 function switchEngine(engine) {
   if (STATE.engine === engine) return;
   STATE.engine = engine;
 
+  // Update Tab active styling
+  [tabEdge, tabKokoro, tabChattts, tabF5].forEach(tab => tab.classList.remove('active'));
+
   if (engine === 'edge') {
     tabEdge.classList.add('active');
-    tabKokoro.classList.remove('active');
+    chatttsTokenBar.classList.add('hidden');
+    chatttsControls.classList.add('hidden');
+    f5ttsControls.classList.add('hidden');
     emotionSection.classList.remove('hidden');
     intensityGroup.classList.remove('hidden');
     pitchGroup.classList.remove('hidden');
+    voiceGridLabel.textContent = 'SELECT NARRATOR VOICE';
     engineDesc.textContent = 'Edge-TTS: Cloud Neural voices with express-as SSML styles and lightning-fast rendering.';
-  } else {
+  } else if (engine === 'kokoro') {
     tabKokoro.classList.add('active');
-    tabEdge.classList.remove('active');
+    chatttsTokenBar.classList.add('hidden');
+    chatttsControls.classList.add('hidden');
+    f5ttsControls.classList.add('hidden');
     emotionSection.classList.add('hidden');
     intensityGroup.classList.add('hidden');
     pitchGroup.classList.add('hidden');
-    engineDesc.textContent = 'Kokoro-82M: State-of-the-art local AI model with human-grade rhythm, cadence, and breath.';
+    voiceGridLabel.textContent = 'SELECT KOKORO-82M VOICE';
+    engineDesc.textContent = 'Kokoro-82M: Local 82M parameter StyleTTS2 model with human-grade rhythm and cadence.';
+  } else if (engine === 'chattts') {
+    tabChattts.classList.add('active');
+    chatttsTokenBar.classList.remove('hidden');
+    chatttsControls.classList.remove('hidden');
+    f5ttsControls.classList.add('hidden');
+    emotionSection.classList.add('hidden');
+    intensityGroup.classList.add('hidden');
+    pitchGroup.classList.add('hidden');
+    voiceGridLabel.textContent = 'SELECT CHATTTS SPEAKER PRESET';
+    engineDesc.textContent = 'ChatTTS: Conversational & Storytelling AI with realistic laughter, sighs, and oral breathing.';
+  } else if (engine === 'f5') {
+    tabF5.classList.add('active');
+    chatttsTokenBar.classList.add('hidden');
+    chatttsControls.classList.add('hidden');
+    f5ttsControls.classList.remove('hidden');
+    emotionSection.classList.add('hidden');
+    intensityGroup.classList.add('hidden');
+    pitchGroup.classList.add('hidden');
+    voiceGridLabel.textContent = 'SELECT REFERENCE VOICE (OR UPLOAD YOUR OWN)';
+    engineDesc.textContent = 'F5-TTS: Zero-Shot Diffusion Voice Cloning from 5-10 second reference audio samples.';
   }
 
   renderVoiceGrid();
 }
 
-// Render Voice Grid
+// Render Voice Grid for active engine
 function renderVoiceGrid() {
   voiceGrid.innerHTML = '';
-  const voices = STATE.engine === 'edge' ? STATE.edgeVoices : STATE.kokoroVoices;
+  let voices = [];
+
+  if (STATE.engine === 'edge') voices = STATE.edgeVoices;
+  else if (STATE.engine === 'kokoro') voices = STATE.kokoroVoices;
+  else if (STATE.engine === 'chattts') voices = STATE.chatttsVoices;
+  else if (STATE.engine === 'f5') voices = STATE.f5ttsVoices;
 
   if (!voices.length) {
     voiceGrid.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">No voices available.</div>';
     return;
   }
 
-  // Set default selection to first voice
   STATE.selectedVoice = voices[0];
+
+  // If ChatTTS, set the default seed
+  if (STATE.engine === 'chattts' && STATE.selectedVoice.seed) {
+    chatSeedInput.value = STATE.selectedVoice.seed;
+  }
+
+  // If F5-TTS, set default reference text
+  if (STATE.engine === 'f5' && STATE.selectedVoice.ref_text) {
+    f5RefTextInput.value = STATE.selectedVoice.ref_text;
+  }
 
   voices.forEach(v => {
     const card = document.createElement('div');
@@ -294,6 +434,14 @@ function renderVoiceGrid() {
       document.querySelectorAll('.voice-card-item').forEach(c => c.classList.remove('selected'));
       card.classList.add('selected');
       STATE.selectedVoice = v;
+
+      if (STATE.engine === 'chattts' && v.seed) {
+        chatSeedInput.value = v.seed;
+      }
+      if (STATE.engine === 'f5' && v.ref_text) {
+        f5RefTextInput.value = v.ref_text;
+      }
+
       renderEmotionPills();
     });
 
@@ -303,7 +451,7 @@ function renderVoiceGrid() {
   renderEmotionPills();
 }
 
-// Render Emotion Pills for Selected Voice
+// Render Emotion Pills for Edge-TTS
 function renderEmotionPills() {
   emotionPills.innerHTML = '';
   const voice = STATE.selectedVoice;
@@ -329,7 +477,7 @@ function renderEmotionPills() {
   });
 }
 
-// Update Word Count & Duration Estimate
+// Update Word Count & Estimation
 function updateTextStats() {
   const text = storyText.value.trim();
   const words = text ? text.split(/\s+/).filter(Boolean).length : 0;
@@ -338,7 +486,6 @@ function updateTextStats() {
   wordCountEl.textContent = words.toLocaleString();
   charCountEl.textContent = chars.toLocaleString();
 
-  // Average narration speed ~140 words per minute
   if (words === 0) {
     estDurationEl.textContent = '~0 min';
   } else {
@@ -349,7 +496,7 @@ function updateTextStats() {
   }
 }
 
-// Quick 3s Audition Preview
+// Audition 3s Voice Preview
 async function auditionVoicePreview() {
   if (!STATE.selectedVoice) return;
 
@@ -365,7 +512,14 @@ async function auditionVoicePreview() {
       style_degree: parseFloat(intensitySlider.value),
       rate: parseInt(speedSlider.value),
       pitch: parseInt(pitchSlider.value),
-      text: STATE.selectedVoice.sample_text || 'The silent corridor stretched endlessly into the shadows of the old manor.'
+      text: STATE.selectedVoice.sample_text || 'The silent corridor stretched endlessly into the shadows of the old manor.',
+      chat_seed: parseInt(chatSeedInput.value) || 42,
+      chat_temp: parseFloat(tempSlider.value),
+      chat_oral: parseInt(oralSlider.value),
+      chat_laugh: parseInt(laughSlider.value),
+      f5_ref_audio: STATE.f5CustomAudioPath || STATE.selectedVoice.ref_audio,
+      f5_ref_text: f5RefTextInput.value || STATE.selectedVoice.ref_text,
+      f5_nfe_step: parseInt(nfeSlider.value)
     };
 
     const res = await fetch('/api/preview', {
@@ -390,7 +544,7 @@ async function auditionVoicePreview() {
   }
 }
 
-// Generate Full Long-form Story Audio
+// Generate Full Long-form Story
 async function generateFullStory() {
   const text = storyText.value.trim();
   if (!text) {
@@ -405,7 +559,6 @@ async function generateFullStory() {
   btnGenerate.disabled = true;
   generateText.textContent = 'Processing Narrative...';
 
-  // Show Progress Card
   progressCard.classList.remove('hidden');
   progressBar.style.width = '0%';
   progressPercent.textContent = '0%';
@@ -422,6 +575,13 @@ async function generateFullStory() {
       rate: parseInt(speedSlider.value),
       pitch: parseInt(pitchSlider.value),
       pause_ms: parseInt(pauseSlider.value),
+      chat_seed: parseInt(chatSeedInput.value) || 42,
+      chat_temp: parseFloat(tempSlider.value),
+      chat_oral: parseInt(oralSlider.value),
+      chat_laugh: parseInt(laughSlider.value),
+      f5_ref_audio: STATE.f5CustomAudioPath || STATE.selectedVoice.ref_audio,
+      f5_ref_text: f5RefTextInput.value || STATE.selectedVoice.ref_text,
+      f5_nfe_step: parseInt(nfeSlider.value),
       generate_subtitles: chkSubtitles.checked
     };
 
@@ -445,7 +605,7 @@ async function generateFullStory() {
   }
 }
 
-// Poll Progress of Background Generation
+// Poll Progress
 function startProgressPolling(taskId) {
   if (STATE.pollTimer) clearInterval(STATE.pollTimer);
 
@@ -481,19 +641,17 @@ function startProgressPolling(taskId) {
   }, 750);
 }
 
-// Reset Generation Button State
 function resetGenerateState() {
   STATE.isGenerating = false;
   btnGenerate.disabled = false;
   generateText.textContent = 'Generate Full Story Audio';
 }
 
-// Load Completed Story into Master Player
 function setupMasterAudioPlayer(result) {
   masterPlayer.classList.remove('hidden');
 
   playerTitle.textContent = `${STATE.selectedVoice.name} — ${STATE.selectedVoice.title}`;
-  playerMeta.textContent = `${formatTime(result.duration)} • ${result.word_count.toLocaleString()} Words • ${result.chunks_count} Sections`;
+  playerMeta.textContent = `${formatTime(result.duration)} • ${result.word_count.toLocaleString()} Words • ${result.chunks_count} Sections (${result.engine.toUpperCase()})`;
 
   audioElement.src = result.audio_url + '?t=' + Date.now();
   btnDownloadMp3.href = `/download/${result.filename}`;
@@ -511,12 +669,9 @@ function setupMasterAudioPlayer(result) {
   audioElement.play().then(() => {
     iconPlay.classList.add('hidden');
     iconPause.classList.remove('hidden');
-  }).catch(() => {
-    // Autoplay prevented by browser
-  });
+  }).catch(() => {});
 }
 
-// Master Audio Player Controls
 function togglePlayPause() {
   if (audioElement.paused) {
     audioElement.play();

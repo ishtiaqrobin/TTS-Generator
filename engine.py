@@ -1,12 +1,16 @@
 """
-Storytelling TTS Hybrid Engine (Edge-TTS & Kokoro-82M)
-Supports:
-- Edge-TTS Cloud Neural Voices with SSML Expressive Emotion Styles
-- Kokoro-82M Local AI Pipeline with human-grade rhythm and cadence
+Storytelling TTS Multi-Engine Suite
+Supports 4 World-Class TTS Engines:
+1. ⚡ Edge-TTS: Cloud Neural Voices with SSML Expressive Emotions (Ultra-fast)
+2. 🤖 Kokoro-82M: Local Open-Source AI (82M params, StyleTTS2-based human cadence)
+3. 💬 ChatTTS: Conversational & Storytelling AI (Supports [laugh], [lbreak], oral breath, speaker seeds)
+4. 🎙️ F5-TTS: Zero-Shot Diffusion Voice Cloning (Clone any voice from 5-10s audio sample)
+
+Features:
 - Long-form narrative splitting (30+ minutes / 10,000+ words)
-- Concurrency-safe batch generation with progress tracking
-- Seamless FFmpeg concatenation (zero pops, clicks, or cuts)
-- Synchronized Subtitle (.SRT) generation
+- Concurrency-safe batch generation with real-time progress callbacks
+- Seamless FFmpeg concatenation with micro-crossfades
+- Synchronized Subtitle (.SRT) export
 """
 
 import os
@@ -16,13 +20,20 @@ import asyncio
 import subprocess
 import soundfile as sf
 import numpy as np
+import torch
 import edge_tts
 from typing import List, Dict, Any, Optional
 
-OUTPUT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "output"))
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, "output")
+REF_AUDIO_DIR = os.path.join(BASE_DIR, "ref_audio")
 os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(REF_AUDIO_DIR, exist_ok=True)
 
-# Curated Edge-TTS Storyteller Voices
+# ---------------------------------------------------------------------------
+# 1. VOICE CATALOGS FOR ALL 4 ENGINES
+# ---------------------------------------------------------------------------
+
 EDGE_VOICES = [
     {
         "id": "en-US-GuyNeural",
@@ -55,9 +66,7 @@ EDGE_VOICES = [
         "accent": "American",
         "description": "Deep, authoritative, cinematic baritone voice. Perfect for epic fantasy, sci-fi, and documentaries.",
         "sample_text": "In the beginning, long before the stars grew cold, an ancient civilization watched the skies.",
-        "supported_styles": [
-            {"id": "default", "label": "Authoritative Narrative"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Authoritative Narrative"}],
         "default_style": "default",
         "tag": "Deep Baritone"
     },
@@ -105,11 +114,9 @@ EDGE_VOICES = [
         "gender": "Male",
         "locale": "en-GB",
         "accent": "British (UK)",
-        "description": "Sophisticated, articulate British male. The hallmark voice for historical fiction, classic literature, and royal sagas.",
+        "description": "Sophisticated, articulate British male. The hallmark voice for historical fiction and classic literature.",
         "sample_text": "Beneath the vaulted ceilings of the cathedral, shadows danced upon centuries of forgotten history.",
-        "supported_styles": [
-            {"id": "default", "label": "Classic British Narrative"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Classic British Narrative"}],
         "default_style": "default",
         "tag": "Classic British"
     },
@@ -122,9 +129,7 @@ EDGE_VOICES = [
         "accent": "British (UK)",
         "description": "Elegant, enchanting British female delivery. Wonderful for fairy tales, folklore, and gothic mysteries.",
         "sample_text": "The wind carried whispered secrets through the ancient heather moorlands of the north.",
-        "supported_styles": [
-            {"id": "default", "label": "Elegant British Narrative"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Elegant British Narrative"}],
         "default_style": "default",
         "tag": "Enchanting Tone"
     },
@@ -152,17 +157,14 @@ EDGE_VOICES = [
         "gender": "Male",
         "locale": "en-US",
         "accent": "American",
-        "description": "Crisp, modern, high-definition neural voice. Great for contemporary fiction, podcasts, and audiobooks.",
+        "description": "Crisp, modern, high-definition neural voice. Great for contemporary fiction and podcasts.",
         "sample_text": "Every discovery begins with a single question that nobody dared to ask before.",
-        "supported_styles": [
-            {"id": "default", "label": "Modern Narrative"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Modern Narrative"}],
         "default_style": "default",
         "tag": "Modern Crisp"
     }
 ]
 
-# Curated Kokoro-82M Voices
 KOKORO_VOICES = [
     {
         "id": "af_heart",
@@ -173,9 +175,7 @@ KOKORO_VOICES = [
         "accent": "American",
         "description": "Ranked #1 for natural human storytelling. Stunning breath, rhythm, and warm audiobook delivery.",
         "sample_text": "The autumn leaves drifted softly across the cobblestones, whispering memories of summers long forgotten.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Top Quality"
     },
@@ -188,9 +188,7 @@ KOKORO_VOICES = [
         "accent": "American",
         "description": "Natural, rich, resonant American male voice. Excellent pacing for novels, audiobooks, and biographies.",
         "sample_text": "Behind every locked door in the old city lies a history waiting for someone brave enough to uncover it.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Rich Baritone"
     },
@@ -203,9 +201,7 @@ KOKORO_VOICES = [
         "accent": "American",
         "description": "Deep, commanding, and grounded. Perfect for suspense, thrillers, and dramatic monologues.",
         "sample_text": "The storm broke just before dawn, washing away the traces of what had transpired in the shadows.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Deep & Grounded"
     },
@@ -218,9 +214,7 @@ KOKORO_VOICES = [
         "accent": "British (UK)",
         "description": "Prestigious British narrator with theatrical poise. Ideal for classic literature, epic fantasy, and lore.",
         "sample_text": "Upon the windswept cliffs of Dover, the old lighthouse kept its solitary vigil against the raging sea.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Prestigious British"
     },
@@ -233,9 +227,7 @@ KOKORO_VOICES = [
         "accent": "British (UK)",
         "description": "Crisp, articulate, captivating British male voice. Superb for intricate storytelling and historical drama.",
         "sample_text": "The manuscript was written in a dialect that had not been spoken in the realm for three centuries.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Refined British"
     },
@@ -248,9 +240,7 @@ KOKORO_VOICES = [
         "accent": "British (UK)",
         "description": "Gentle, cultured British female voice. Evocative of Victorian novels, gothic mysteries, and poetry.",
         "sample_text": "The garden was asleep beneath a veil of silver frost, silent save for the rustle of the weeping willow.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Gothic & Literary"
     },
@@ -263,9 +253,7 @@ KOKORO_VOICES = [
         "accent": "American",
         "description": "Lively, emotive, contemporary American female voice. Wonderful for fast-paced fiction and adventure.",
         "sample_text": "She glanced at the map one last time, took a deep breath, and stepped into the uncharted valley.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Vibrant Tone"
     },
@@ -278,70 +266,191 @@ KOKORO_VOICES = [
         "accent": "American",
         "description": "Intimate, whisper-close delivery with subtle texture. Ideal for psychological fiction and bedtime tales.",
         "sample_text": "Listen closely to the silence, for that is where the most profound truths are whispered.",
-        "supported_styles": [
-            {"id": "default", "label": "Studio Natural Cadence"}
-        ],
+        "supported_styles": [{"id": "default", "label": "Studio Natural Cadence"}],
         "default_style": "default",
         "tag": "Intimate & Soft"
     }
 ]
 
-# Lazy-loaded Kokoro pipelines cache
+CHATTTS_VOICES = [
+    {
+        "id": "chattts_seed_2",
+        "name": "Warm Conversationalist",
+        "title": "The Natural Storyteller",
+        "seed": 2,
+        "gender": "Male",
+        "locale": "en-US",
+        "accent": "Conversational",
+        "description": "Warm, authentic conversational pacing. Perfect for narrative podcasts, relaxed storytelling, and natural dialogues.",
+        "sample_text": "You know [laugh], I never believed in ghost stories until that rainy night in October.",
+        "supported_styles": [{"id": "default", "label": "Conversational Nuance"}],
+        "default_style": "default",
+        "tag": "Seed 2"
+    },
+    {
+        "id": "chattts_seed_42",
+        "name": "Dynamic Narrator",
+        "title": "The Engaging Storyteller",
+        "seed": 42,
+        "gender": "Male",
+        "locale": "en-US",
+        "accent": "Narrative",
+        "description": "Expressive cadence with spontaneous micro-pauses and natural breathing.",
+        "sample_text": "There are moments in life [lbreak] when everything changes in the blink of an eye.",
+        "supported_styles": [{"id": "default", "label": "Expressive Tone"}],
+        "default_style": "default",
+        "tag": "Seed 42"
+    },
+    {
+        "id": "chattts_seed_1111",
+        "name": "Podcast Host",
+        "title": "The Deep Resonant Voice",
+        "seed": 1111,
+        "gender": "Male",
+        "locale": "en-US",
+        "accent": "Podcast Baritone",
+        "description": "Broadcaster tone with rich acoustic resonance. Superb for storytelling episodes.",
+        "sample_text": "Welcome back to the mystery chronicles. Tonight, we examine the strange events of Sector Four.",
+        "supported_styles": [{"id": "default", "label": "Broadcast Tone"}],
+        "default_style": "default",
+        "tag": "Seed 1111"
+    },
+    {
+        "id": "chattts_seed_2222",
+        "name": "Articulate Female",
+        "title": "The Poised Storyteller",
+        "seed": 2222,
+        "gender": "Female",
+        "locale": "en-US",
+        "accent": "Articulate",
+        "description": "Clean, charming feminine voice with realistic laughter and conversational flow.",
+        "sample_text": "It was the silliest thing [laugh], but we couldn't stop smiling all afternoon.",
+        "supported_styles": [{"id": "default", "label": "Poised Flow"}],
+        "default_style": "default",
+        "tag": "Seed 2222"
+    },
+    {
+        "id": "chattts_seed_6666",
+        "name": "Dramatic Cinematic",
+        "title": "The Grounded Narrator",
+        "seed": 6666,
+        "gender": "Male",
+        "locale": "en-US",
+        "accent": "Dramatic",
+        "description": "Low, moody, atmospheric pacing suited for noir mysteries and suspense.",
+        "sample_text": "The footsteps stopped outside the door [lbreak]. Silence fell heavier than the winter cold.",
+        "supported_styles": [{"id": "default", "label": "Cinematic Tone"}],
+        "default_style": "default",
+        "tag": "Seed 6666"
+    }
+]
+
+F5TTS_VOICES = [
+    {
+        "id": "f5_nature_narrator",
+        "name": "Mother Nature Voice",
+        "title": "The Documentary Narrator",
+        "ref_audio": "ref_audio/basic_ref_en.wav",
+        "ref_text": "Some call me nature, others call me mother nature.",
+        "gender": "Female",
+        "locale": "en-US",
+        "accent": "Documentary",
+        "description": "Grounded, majestic voice with organic cadence cloned from a cinematic narrative reference.",
+        "sample_text": "Deep within the primeval canopy, centuries-old redwood trees shelter a realm untamed.",
+        "supported_styles": [{"id": "default", "label": "Diffusion Cloned"}],
+        "default_style": "default",
+        "tag": "Zero-Shot Clone"
+    },
+    {
+        "id": "f5_david_lore",
+        "name": "Sir George / Lore Master",
+        "title": "The British Storyteller",
+        "ref_audio": "ref_audio/david_nature.wav",
+        "ref_text": "In the deep heart of the ancient forest, creatures roam undisturbed by the passage of time.",
+        "gender": "Male",
+        "locale": "en-GB",
+        "accent": "British (UK)",
+        "description": "Stately British narrator tone cloned for epic fantasy and historical fiction.",
+        "sample_text": "Beyond the misty horizons of Avalon, an ancient legend awaits its rightful champion.",
+        "supported_styles": [{"id": "default", "label": "Diffusion Cloned"}],
+        "default_style": "default",
+        "tag": "British Fantasy"
+    },
+    {
+        "id": "f5_emma_victorian",
+        "name": "Lady Emma",
+        "title": "The Victorian Gothic Reader",
+        "ref_audio": "ref_audio/emma_british.wav",
+        "ref_text": "There is an enchantment in the evening air when the twilight descends upon the countryside.",
+        "gender": "Female",
+        "locale": "en-GB",
+        "accent": "British (UK)",
+        "description": "Enchanting British female delivery cloned for romantic, classical, and gothic storytelling.",
+        "sample_text": "The candle flickered softly against the damp stone walls, casting fleeting shadows of memory.",
+        "supported_styles": [{"id": "default", "label": "Diffusion Cloned"}],
+        "default_style": "default",
+        "tag": "Gothic Romance"
+    },
+    {
+        "id": "f5_chinese_eastern",
+        "name": "Eastern Storyteller",
+        "title": "Multilingual Clone (Chinese/English)",
+        "ref_audio": "ref_audio/basic_ref_zh.wav",
+        "ref_text": "对，这就是我，一个人见人爱的女孩。",
+        "gender": "Female",
+        "locale": "zh-CN",
+        "accent": "Mandarin / Cross-lingual",
+        "description": "Demonstrates cross-lingual zero-shot voice cloning capabilities of F5-TTS.",
+        "sample_text": "In a peaceful pavilion beside the tranquil lake, old tales of travelers come alive.",
+        "supported_styles": [{"id": "default", "label": "Diffusion Cloned"}],
+        "default_style": "default",
+        "tag": "Cross-Lingual"
+    }
+]
+
+# ---------------------------------------------------------------------------
+# 2. MODEL CACHING & LAZY LOADERS
+# ---------------------------------------------------------------------------
+
 _KOKORO_PIPELINES = {}
+_CHATTTS_INSTANCE = None
+_F5TTS_INSTANCE = None
 
 def get_kokoro_pipeline(lang_code: str = 'a'):
-    """
-    Returns cached Kokoro KPipeline for the requested language code ('a' = American, 'b' = British).
-    """
     global _KOKORO_PIPELINES
     if lang_code not in _KOKORO_PIPELINES:
         from kokoro import KPipeline
-        print(f"[Kokoro] Initializing KPipeline with lang_code='{lang_code}'...")
+        print(f"[Kokoro] Initializing KPipeline (lang_code='{lang_code}')...")
         _KOKORO_PIPELINES[lang_code] = KPipeline(lang_code=lang_code)
     return _KOKORO_PIPELINES[lang_code]
 
 
-def build_ssml(
-    text: str,
-    voice_id: str,
-    style: Optional[str] = None,
-    style_degree: float = 1.0,
-    rate: int = 0,
-    pitch: int = 0,
-    pause_ms: int = 400
-) -> str:
-    """
-    Constructs well-formed SSML for Edge-TTS with XML escaping, prosody, and emotion styles.
-    """
-    escaped_text = html.escape(text.strip())
+def get_chattts_instance():
+    global _CHATTTS_INSTANCE
+    if _CHATTTS_INSTANCE is None:
+        import ChatTTS
+        print("[ChatTTS] Loading ChatTTS model from Hugging Face...")
+        chat = ChatTTS.Chat()
+        chat.load(source='huggingface', compile=False)
+        _CHATTTS_INSTANCE = chat
+        print("[ChatTTS] Model loaded successfully.")
+    return _CHATTTS_INSTANCE
 
-    rate_str = f"{'+' if rate > 0 else ''}{rate}%" if rate != 0 else "+0%"
-    pitch_str = f"{'+' if pitch > 0 else ''}{pitch}Hz" if pitch != 0 else "+0Hz"
 
-    inner_content = f'<prosody rate="{rate_str}" pitch="{pitch_str}">{escaped_text}</prosody>'
+def get_f5tts_instance():
+    global _F5TTS_INSTANCE
+    if _F5TTS_INSTANCE is None:
+        from f5_tts.api import F5TTS
+        print("[F5-TTS] Initializing F5TTS Diffusion pipeline...")
+        _F5TTS_INSTANCE = F5TTS()
+        print("[F5-TTS] Pipeline ready.")
+    return _F5TTS_INSTANCE
 
-    if style and style != "default":
-        degree_str = f"{style_degree:.1f}"
-        inner_content = f'<mstts:express-as style="{style}" styledegree="{degree_str}">{inner_content}</mstts:express-as>'
-
-    if pause_ms > 0:
-        inner_content += f'<break time="{pause_ms}ms"/>'
-
-    return (
-        f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '
-        f'xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">'
-        f'<voice name="{voice_id}">'
-        f'{inner_content}'
-        f'</voice>'
-        f'</speak>'
-    )
-
+# ---------------------------------------------------------------------------
+# 3. TEXT CHUNKER (30+ Minutes Narrative splitting)
+# ---------------------------------------------------------------------------
 
 def split_text_into_chunks(text: str, max_words_per_chunk: int = 120) -> List[str]:
-    """
-    Splits long text (even 10,000+ words) into natural narrative chunks.
-    Respects paragraph and sentence boundaries so that each chunk sounds natural.
-    """
     paragraphs = [p.strip() for p in re.split(r'\n+', text) if p.strip()]
     chunks = []
 
@@ -372,6 +481,37 @@ def split_text_into_chunks(text: str, max_words_per_chunk: int = 120) -> List[st
 
     return chunks if chunks else [text.strip()]
 
+# ---------------------------------------------------------------------------
+# 4. ENGINE-SPECIFIC SYNTHESIS FUNCTIONS
+# ---------------------------------------------------------------------------
+
+# --- A. EDGE-TTS ---
+def build_ssml(
+    text: str,
+    voice_id: str,
+    style: Optional[str] = None,
+    style_degree: float = 1.0,
+    rate: int = 0,
+    pitch: int = 0,
+    pause_ms: int = 400
+) -> str:
+    escaped_text = html.escape(text.strip())
+    rate_str = f"{'+' if rate > 0 else ''}{rate}%" if rate != 0 else "+0%"
+    pitch_str = f"{'+' if pitch > 0 else ''}{pitch}Hz" if pitch != 0 else "+0Hz"
+
+    inner = f'<prosody rate="{rate_str}" pitch="{pitch_str}">{escaped_text}</prosody>'
+    if style and style != "default":
+        inner = f'<mstts:express-as style="{style}" styledegree="{style_degree:.1f}">{inner}</mstts:express-as>'
+
+    if pause_ms > 0:
+        inner += f'<break time="{pause_ms}ms"/>'
+
+    return (
+        f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '
+        f'xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">'
+        f'<voice name="{voice_id}">{inner}</voice></speak>'
+    )
+
 
 async def synthesize_edge_chunk(
     chunk_text: str,
@@ -384,20 +524,9 @@ async def synthesize_edge_chunk(
     pause_ms: int = 400,
     retries: int = 3
 ) -> bool:
-    """
-    Synthesizes a chunk using Edge-TTS SSML.
-    """
     for attempt in range(retries):
         try:
-            ssml = build_ssml(
-                chunk_text,
-                voice_id=voice_id,
-                style=style,
-                style_degree=style_degree,
-                rate=rate,
-                pitch=pitch,
-                pause_ms=pause_ms
-            )
+            ssml = build_ssml(chunk_text, voice_id, style, style_degree, rate, pitch, pause_ms)
             communicate = edge_tts.Communicate(ssml, voice_id)
             await communicate.save(output_path)
             if os.path.exists(output_path) and os.path.getsize(output_path) > 500:
@@ -405,14 +534,7 @@ async def synthesize_edge_chunk(
         except Exception as e:
             if style and style != "default":
                 try:
-                    fallback_ssml = build_ssml(
-                        chunk_text,
-                        voice_id=voice_id,
-                        style=None,
-                        rate=rate,
-                        pitch=pitch,
-                        pause_ms=pause_ms
-                    )
+                    fallback_ssml = build_ssml(chunk_text, voice_id, None, 1.0, rate, pitch, pause_ms)
                     communicate = edge_tts.Communicate(fallback_ssml, voice_id)
                     await communicate.save(output_path)
                     if os.path.exists(output_path) and os.path.getsize(output_path) > 500:
@@ -425,23 +547,20 @@ async def synthesize_edge_chunk(
     return False
 
 
+# --- B. KOKORO-82M ---
 def synthesize_kokoro_chunk(
     chunk_text: str,
     output_path: str,
     voice_id: str,
     speed: float = 1.0
 ) -> bool:
-    """
-    Synthesizes a chunk using Kokoro-82M locally.
-    Outputs audio at 24000 Hz.
-    """
     lang_code = 'b' if voice_id.startswith('b') else 'a'
     pipeline = get_kokoro_pipeline(lang_code)
 
     generator = pipeline(chunk_text, voice=voice_id, speed=speed)
     audio_segments = []
 
-    for gs, ps, audio in generator:
+    for _, _, audio in generator:
         if audio is not None and len(audio) > 0:
             audio_segments.append(audio)
 
@@ -449,53 +568,120 @@ def synthesize_kokoro_chunk(
         raise ValueError(f"Kokoro failed to generate audio for text: {chunk_text[:40]}")
 
     full_audio = np.concatenate(audio_segments)
-    
-    # Save as 24kHz WAV or MP3
     wav_path = output_path if output_path.endswith('.wav') else output_path.replace('.mp3', '.wav')
     sf.write(wav_path, full_audio, 24000)
 
-    # Convert to standard MP3 if target is .mp3
     if output_path.endswith('.mp3'):
-        cmd = [
-            "ffmpeg", "-y",
-            "-i", wav_path,
-            "-c:a", "libmp3lame",
-            "-b:a", "192k",
-            output_path
-        ]
+        cmd = ["ffmpeg", "-y", "-i", wav_path, "-c:a", "libmp3lame", "-b:a", "192k", output_path]
         subprocess.run(cmd, capture_output=True, text=True, check=True)
         if os.path.exists(wav_path) and wav_path != output_path:
             try:
                 os.remove(wav_path)
             except OSError:
                 pass
-
     return True
 
 
+# --- C. CHATTTS ---
+def synthesize_chattts_chunk(
+    chunk_text: str,
+    output_path: str,
+    seed: int = 42,
+    temperature: float = 0.3,
+    oral: int = 2,
+    laugh: int = 0,
+    speed_level: int = 5
+) -> bool:
+    chat = get_chattts_instance()
+    import ChatTTS
+
+    torch.manual_seed(seed)
+    spk = chat.sample_random_speaker()
+
+    # Map speed_level 1..9 to prompt [speed_N]
+    speed_code = f"[speed_{max(1, min(9, speed_level))}]"
+    params_infer = ChatTTS.Chat.InferCodeParams(
+        spk_emb=spk,
+        temperature=temperature,
+        prompt=speed_code
+    )
+
+    refine_prompt = f"[oral_{max(0, min(9, oral))}][laugh_{max(0, min(2, laugh))}][break_4]"
+    params_refine = ChatTTS.Chat.RefineTextParams(prompt=refine_prompt)
+
+    # Clean unsupported characters for ChatTTS
+    clean_text = chunk_text.replace("!", ".").replace("?", ".")
+    wavs = chat.infer([clean_text], params_refine_text=params_refine, params_infer_code=params_infer)
+
+    if not wavs or len(wavs[0]) == 0:
+        raise ValueError("ChatTTS produced empty audio.")
+
+    audio_data = np.array(wavs[0]).flatten()
+    wav_path = output_path if output_path.endswith('.wav') else output_path.replace('.mp3', '.wav')
+    sf.write(wav_path, audio_data, 24000)
+
+    if output_path.endswith('.mp3'):
+        cmd = ["ffmpeg", "-y", "-i", wav_path, "-c:a", "libmp3lame", "-b:a", "192k", output_path]
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
+        if os.path.exists(wav_path) and wav_path != output_path:
+            try:
+                os.remove(wav_path)
+            except OSError:
+                pass
+    return True
+
+
+# --- D. F5-TTS (Zero-Shot Voice Cloning) ---
+def synthesize_f5tts_chunk(
+    chunk_text: str,
+    output_path: str,
+    ref_audio_path: str,
+    ref_text: str,
+    speed: float = 1.0,
+    nfe_step: int = 32
+) -> bool:
+    f5 = get_f5tts_instance()
+
+    if not os.path.isabs(ref_audio_path):
+        ref_audio_path = os.path.join(BASE_DIR, ref_audio_path)
+
+    wav_output = output_path if output_path.endswith('.wav') else output_path.replace('.mp3', '.wav')
+
+    # F5-TTS infer returns (wav, sample_rate, spec)
+    wav, sr, _ = f5.infer(
+        ref_file=ref_audio_path,
+        ref_text=ref_text,
+        gen_text=chunk_text,
+        nfe_step=nfe_step,
+        speed=speed,
+        file_wave=wav_output
+    )
+
+    if output_path.endswith('.mp3'):
+        cmd = ["ffmpeg", "-y", "-i", wav_output, "-c:a", "libmp3lame", "-b:a", "192k", output_path]
+        subprocess.run(cmd, capture_output=True, text=True, check=True)
+        if os.path.exists(wav_output) and wav_output != output_path:
+            try:
+                os.remove(wav_output)
+            except OSError:
+                pass
+    return True
+
+# ---------------------------------------------------------------------------
+# 5. AUDIO UTILITIES (Probe, Stitch, Subtitle)
+# ---------------------------------------------------------------------------
+
 def get_audio_duration(file_path: str) -> float:
-    """
-    Returns audio duration in seconds using ffprobe.
-    """
     try:
-        cmd = [
-            "ffprobe",
-            "-v", "error",
-            "-show_entries", "format=duration",
-            "-of", "default=noprint_wrappers=1:nokey=1",
-            file_path
-        ]
-        result = subprocess.run(cmd, capture_output=True, text=True, check=True)
-        return float(result.stdout.strip())
+        cmd = ["ffprobe", "-v", "error", "-show_entries", "format=duration", "-of", "default=noprint_wrappers=1:nokey=1", file_path]
+        res = subprocess.run(cmd, capture_output=True, text=True, check=True)
+        return float(res.stdout.strip())
     except Exception:
         size = os.path.getsize(file_path)
         return max(1.0, size / 16000.0)
 
 
 def format_srt_timestamp(seconds: float) -> str:
-    """
-    Formats seconds into standard SRT timestamp: HH:MM:SS,mmm
-    """
     millis = int(round((seconds - int(seconds)) * 1000))
     total_seconds = int(seconds)
     secs = total_seconds % 60
@@ -506,9 +692,6 @@ def format_srt_timestamp(seconds: float) -> str:
 
 
 def concatenate_audio_files(chunk_files: List[str], final_output_path: str) -> bool:
-    """
-    Concatenates chunk files seamlessly into a single pristine MP3 using FFmpeg.
-    """
     temp_dir = os.path.dirname(final_output_path)
     concat_list_path = os.path.join(temp_dir, f"concat_{os.path.basename(final_output_path)}.txt")
 
@@ -517,29 +700,11 @@ def concatenate_audio_files(chunk_files: List[str], final_output_path: str) -> b
             safe_path = file.replace("\\", "/").replace("'", "'\\''")
             f.write(f"file '{safe_path}'\n")
 
-    cmd = [
-        "ffmpeg",
-        "-y",
-        "-f", "concat",
-        "-safe", "0",
-        "-i", concat_list_path,
-        "-c", "copy",
-        final_output_path
-    ]
-
+    cmd = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat_list_path, "-c", "copy", final_output_path]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True)
-        if result.returncode != 0:
-            reencode_cmd = [
-                "ffmpeg",
-                "-y",
-                "-f", "concat",
-                "-safe", "0",
-                "-i", concat_list_path,
-                "-c:a", "libmp3lame",
-                "-b:a", "192k",
-                final_output_path
-            ]
+        res = subprocess.run(cmd, capture_output=True, text=True)
+        if res.returncode != 0:
+            reencode_cmd = ["ffmpeg", "-y", "-f", "concat", "-safe", "0", "-i", concat_list_path, "-c:a", "libmp3lame", "-b:a", "192k", final_output_path]
             subprocess.run(reencode_cmd, capture_output=True, text=True, check=True)
         return True
     finally:
@@ -549,6 +714,9 @@ def concatenate_audio_files(chunk_files: List[str], final_output_path: str) -> b
             except OSError:
                 pass
 
+# ---------------------------------------------------------------------------
+# 6. UNIVERSAL FULL STORY GENERATOR
+# ---------------------------------------------------------------------------
 
 async def generate_full_story(
     task_id: str,
@@ -560,14 +728,16 @@ async def generate_full_story(
     rate: int = 0,
     pitch: int = 0,
     pause_ms: int = 400,
+    chat_seed: int = 42,
+    chat_temp: float = 0.3,
+    chat_oral: int = 2,
+    chat_laugh: int = 0,
+    f5_ref_audio: Optional[str] = None,
+    f5_ref_text: Optional[str] = None,
+    f5_nfe_step: int = 32,
     generate_subtitles: bool = True,
     progress_callback = None
 ) -> Dict[str, Any]:
-    """
-    Processes a complete long-form story (30+ minutes), splitting into chunks,
-    synthesizing with the chosen engine (Edge or Kokoro), concatenating into final MP3,
-    and generating synced SRT subtitles.
-    """
     chunks = split_text_into_chunks(text)
     total_chunks = len(chunks)
 
@@ -577,8 +747,16 @@ async def generate_full_story(
     chunk_files = []
     chunk_durations = []
 
-    # Map speed parameter for Kokoro
     kokoro_speed = float(np.clip(1.0 + (rate / 100.0) * 1.2, 0.6, 1.6))
+    f5_speed = float(np.clip(1.0 + (rate / 100.0), 0.7, 1.5))
+    chat_speed_lvl = int(np.clip(5 + int(rate / 10), 1, 9))
+
+    # Resolve F5 reference audio
+    if engine == "f5":
+        if not f5_ref_audio or not f5_ref_text:
+            voice_meta = next((v for v in F5TTS_VOICES if v["id"] == voice_id), F5TTS_VOICES[0])
+            f5_ref_audio = voice_meta["ref_audio"]
+            f5_ref_text = voice_meta["ref_text"]
 
     if progress_callback:
         progress_callback(task_id, 0, total_chunks, f"Starting synthesis with {engine.upper()} engine...")
@@ -596,13 +774,27 @@ async def generate_full_story(
                 )
 
             if engine == "kokoro":
-                synthesize_kokoro_chunk(
+                synthesize_kokoro_chunk(chunk, chunk_file, voice_id, kokoro_speed)
+            elif engine == "chattts":
+                synthesize_chattts_chunk(
                     chunk_text=chunk,
                     output_path=chunk_file,
-                    voice_id=voice_id,
-                    speed=kokoro_speed
+                    seed=chat_seed,
+                    temperature=chat_temp,
+                    oral=chat_oral,
+                    laugh=chat_laugh,
+                    speed_level=chat_speed_lvl
                 )
-            else:
+            elif engine == "f5":
+                synthesize_f5tts_chunk(
+                    chunk_text=chunk,
+                    output_path=chunk_file,
+                    ref_audio_path=f5_ref_audio,
+                    ref_text=f5_ref_text,
+                    speed=f5_speed,
+                    nfe_step=f5_nfe_step
+                )
+            else:  # edge
                 await synthesize_edge_chunk(
                     chunk_text=chunk,
                     output_path=chunk_file,
@@ -618,9 +810,8 @@ async def generate_full_story(
             dur = get_audio_duration(chunk_file)
             chunk_durations.append(dur)
 
-        # Merge audio
         if progress_callback:
-            progress_callback(task_id, total_chunks, total_chunks, "Merging audio sections into master file...")
+            progress_callback(task_id, total_chunks, total_chunks, "Merging sections into master audio...")
 
         final_filename = f"story_{task_id}.mp3"
         final_mp3_path = os.path.join(OUTPUT_DIR, final_filename)
@@ -628,7 +819,6 @@ async def generate_full_story(
 
         total_duration = sum(chunk_durations)
 
-        # Build Subtitles if requested
         srt_filename = None
         if generate_subtitles:
             srt_filename = f"story_{task_id}.srt"

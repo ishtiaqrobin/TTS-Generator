@@ -1042,3 +1042,151 @@ input[type="range"]::-webkit-slider-thumb:hover {
 .hidden {
   display: none !important;
 }
+
+/* -------------------------------------------------------------------------- */
+/* 8. 4-ENGINE EXTENSIONS (ChatTTS & F5-TTS)                                 */
+/* -------------------------------------------------------------------------- */
+
+/* Badges for ChatTTS and F5-TTS */
+.tab-badge.chat-badge {
+  color: #fb923c;
+}
+.engine-tab.active .tab-badge.chat-badge {
+  background: rgba(251, 146, 60, 0.15);
+  border-color: rgba(251, 146, 60, 0.4);
+}
+
+.tab-badge.clone-badge {
+  color: #a855f7;
+}
+.engine-tab.active .tab-badge.clone-badge {
+  background: rgba(168, 85, 247, 0.15);
+  border-color: rgba(168, 85, 247, 0.4);
+}
+
+/* ChatTTS Narrative Token Bar */
+.token-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  padding: 8px 14px;
+  border-radius: 12px;
+  margin-bottom: -6px;
+}
+
+.token-bar-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.token-btn {
+  background: var(--pill-bg);
+  color: var(--pill-text);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.token-btn:hover {
+  background: var(--pill-hover);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+/* Custom Control Boxes (ChatTTS & F5-TTS) */
+.custom-control-box {
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.seed-control-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+@media (max-width: 600px) {
+  .seed-control-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+.seed-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.seed-input-wrap {
+  display: flex;
+  gap: 6px;
+}
+
+.seed-input-wrap input {
+  flex: 1;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+}
+
+.chat-sliders-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* F5-TTS Upload Area */
+.f5-upload-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.f5-upload-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.f5-upload-group input[type="file"] {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  width: 100%;
+}
+
+.f5-ref-text-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.f5-ref-text-group input[type="text"] {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 0.85rem;
+  width: 100%;
+}
+
