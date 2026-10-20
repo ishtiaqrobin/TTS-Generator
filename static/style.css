@@ -1,40 +1,25 @@
-/* Storyteller Studio — Dual Theme Engine (Image-Inspired Dark & White/Black/Red Light) */
+/* Storyteller Studio — Streamlined Custom CSS for Tailwind CSS v3 */
 
 /* -------------------------------------------------------------------------- */
-/* 1. THEME DEFINITIONS                                                       */
+/* 1. THEME TOKENS FOR DYNAMIC JS COMPONENTS                                   */
 /* -------------------------------------------------------------------------- */
 
-/* DARK THEME (Image-Inspired Warm Slate Charcoal) */
 :root,
 html.dark,
 [data-theme="dark"] {
-  --theme: 'dark';
-
-  /* Canvas & Cards (Matching attached screenshot: #38393a / #252627) */
   --bg: #38393a;
   --bg-subtle: #303132;
   --card: #252627;
   --card-hover: #2d2e2f;
   --card-selected: #1f2021;
   --input-bg: #1b1c1d;
-
-  /* Borders & Dividers */
   --border: rgba(255, 255, 255, 0.09);
   --border-focus: rgba(255, 255, 255, 0.26);
-
-  /* Typography */
   --text: #f1f2f2;
   --text-muted: #a6a8a9;
   --text-dim: #797b7d;
-
-  /* Accent & Interactive (Warm silver/charcoal pill aesthetic) */
   --accent: #5e6061;
-  --accent-hover: #6e7072;
   --accent-light: #e4e5e5;
-  --accent-subtle: rgba(255, 255, 255, 0.08);
-  --accent-border: rgba(255, 255, 255, 0.2);
-
-  /* Pill & Tab Controls */
   --pill-bg: #4f5152;
   --pill-hover: #5d5f60;
   --pill-active-bg: #6e7072;
@@ -42,59 +27,29 @@ html.dark,
   --pill-text: #e2e3e3;
   --tab-container-bg: #1e1f20;
   --stat-bg: #1c1d1e;
-
-  /* Buttons */
-  --btn-primary-bg: #e4e5e5;
-  --btn-primary-text: #191a1a;
-  --btn-primary-hover: #ffffff;
-  --btn-secondary-bg: #1d1e1f;
-  --btn-secondary-text: #f0f1f1;
-  --btn-secondary-border: rgba(255, 255, 255, 0.12);
-
-  /* Progress & Player */
-  --progress-track: #1b1c1d;
-  --progress-fill: linear-gradient(90deg, #6e7072, #b8b9ba);
-  --player-bg: rgba(37, 38, 39, 0.94);
-  --player-border: rgba(255, 255, 255, 0.1);
   --slider-track: #1b1c1d;
   --slider-thumb: #e4e5e5;
   --slider-thumb-shadow: rgba(255, 255, 255, 0.3);
-
+  --player-bg: rgba(37, 38, 39, 0.94);
+  --player-border: rgba(255, 255, 255, 0.1);
   --brand-gradient: linear-gradient(135deg, #4f5152, #757779);
-  --success: #34d399;
-  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
 }
 
-/* LIGHT THEME (White, Black & Red — সাদা, কালো এবং লাল) */
 html.light,
 [data-theme="light"] {
-  --theme: 'light';
-
-  /* Canvas & Cards */
   --bg: #f4f4f6;
   --bg-subtle: #eaecef;
   --card: #ffffff;
   --card-hover: #fafafa;
   --card-selected: #fff1f2;
   --input-bg: #ffffff;
-
-  /* Borders & Dividers */
   --border: #e4e4e7;
   --border-focus: #dc2626;
-
-  /* Typography */
   --text: #09090b;
   --text-muted: #52525b;
   --text-dim: #71717a;
-
-  /* Crimson Red Accent */
-  --accent: #dc2626;          /* Vibrant Red */
-  --accent-hover: #b91c1c;    /* Deep Crimson */
-  --accent-light: #ef4444;    /* Light Coral Red */
-  --accent-subtle: rgba(220, 38, 38, 0.08);
-  --accent-border: rgba(220, 38, 38, 0.3);
-
-  /* Pill & Tab Controls */
+  --accent: #dc2626;
+  --accent-light: #ef4444;
   --pill-bg: #f4f4f5;
   --pill-hover: #fee2e2;
   --pill-active-bg: #dc2626;
@@ -102,508 +57,40 @@ html.light,
   --pill-text: #18181b;
   --tab-container-bg: #e4e4e7;
   --stat-bg: #f4f4f5;
-
-  /* Buttons */
-  --btn-primary-bg: #dc2626;  /* Red */
-  --btn-primary-text: #ffffff;
-  --btn-primary-hover: #b91c1c;
-  --btn-secondary-bg: #ffffff;
-  --btn-secondary-text: #09090b;
-  --btn-secondary-border: #d4d4d8;
-
-  /* Progress & Player */
-  --progress-track: #e4e4e7;
-  --progress-fill: linear-gradient(90deg, #dc2626, #f43f5e);
-  --player-bg: rgba(255, 255, 255, 0.95);
-  --player-border: #e4e4e7;
   --slider-track: #e4e4e7;
   --slider-thumb: #dc2626;
   --slider-thumb-shadow: rgba(220, 38, 38, 0.35);
-
+  --player-bg: rgba(255, 255, 255, 0.95);
+  --player-border: #e4e4e7;
   --brand-gradient: linear-gradient(135deg, #dc2626, #991b1b);
-  --success: #16a34a;
-  --shadow-card: 0 8px 24px rgba(0, 0, 0, 0.06);
 }
 
 /* -------------------------------------------------------------------------- */
-/* 2. BASE STYLES & RESET                                                     */
+/* 2. BASE RESETS & SCROLLBARS                                                */
 /* -------------------------------------------------------------------------- */
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  transition: background-color 0.25s ease, border-color 0.25s ease, color 0.2s ease, box-shadow 0.2s ease;
-}
 
 body {
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  -webkit-font-smoothing: antialiased;
-  line-height: 1.5;
-  padding-bottom: 96px;
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  transition: background-color 0.25s ease, color 0.2s ease;
 }
 
-/* Custom Scrollbars */
 ::-webkit-scrollbar {
   width: 6px;
   height: 6px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: var(--accent);
   border-radius: 999px;
 }
-::-webkit-scrollbar-thumb:hover {
-  background: var(--accent-hover);
-}
-
-.app-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  width: 100%;
-  padding: 20px 28px;
-  display: flex;
-  flex-direction: column;
-  gap: 20px;
-}
 
 /* -------------------------------------------------------------------------- */
-/* 3. HEADER                                                                  */
+/* 3. DYNAMIC JS VOICE CARDS & PILLS                                          */
 /* -------------------------------------------------------------------------- */
-
-.app-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 14px 22px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  box-shadow: var(--shadow-card);
-  backdrop-filter: blur(12px);
-  flex-wrap: wrap;
-  gap: 12px;
-}
-
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.logo-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 12px;
-  background: var(--brand-gradient);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #fff;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.brand-title {
-  font-size: 1.05rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
-}
-
-.brand-subtitle {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  font-weight: 500;
-}
-
-/* Engine Tabs */
-.engine-tabs-container {
-  display: flex;
-  align-items: center;
-}
-
-.engine-tabs {
-  display: flex;
-  background: var(--tab-container-bg);
-  border: 1px solid var(--border);
-  padding: 4px;
-  border-radius: 999px;
-  gap: 4px;
-}
-
-.engine-tab {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 16px;
-  border-radius: 999px;
-  background: transparent;
-  border: none;
-  color: var(--text-muted);
-  font-family: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.engine-tab:hover {
-  color: var(--text);
-  background: rgba(255, 255, 255, 0.05);
-}
-
-.engine-tab.active {
-  background: var(--card);
-  color: var(--text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-}
-
-.tab-badge {
-  font-size: 0.65rem;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: var(--stat-bg);
-  color: var(--text-muted);
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.engine-tab.active .tab-badge {
-  background: var(--accent-subtle);
-  color: var(--accent-light);
-  border: 1px solid var(--accent-border);
-}
-
-.tab-badge.local-badge {
-  color: #34d399;
-}
-
-.engine-tab.active .tab-badge.local-badge {
-  background: rgba(16, 185, 129, 0.12);
-  border-color: rgba(16, 185, 129, 0.35);
-}
-
-/* Header Status & Theme Switcher */
-.header-status {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Theme Toggle Button (Modern Pill) */
-.theme-toggle-btn {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  background: var(--tab-container-bg);
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 6px 12px;
-  border-radius: 999px;
-  cursor: pointer;
-  font-family: inherit;
-  font-size: 0.78rem;
-  font-weight: 600;
-  transition: all 0.2s ease;
-}
-
-.theme-toggle-btn:hover {
-  background: var(--card-hover);
-  border-color: var(--border-focus);
-}
-
-.theme-icon {
-  width: 14px;
-  height: 14px;
-}
-
-.theme-text {
-  text-transform: capitalize;
-}
-
-.status-pill-header {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  background: var(--tab-container-bg);
-  border: 1px solid var(--border);
-  padding: 6px 12px;
-  border-radius: 999px;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--success);
-  box-shadow: 0 0 6px var(--success);
-}
-
-/* -------------------------------------------------------------------------- */
-/* 4. MAIN LAYOUT & CARDS                                                     */
-/* -------------------------------------------------------------------------- */
-
-.main-layout {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 1024px) {
-  .main-layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-.card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 20px;
-  padding: 24px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  box-shadow: var(--shadow-card);
-}
-
-.card-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.card-title {
-  font-size: 1.15rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--text);
-}
-
-.card-description {
-  font-size: 0.8rem;
-  color: var(--text-muted);
-  margin-top: 3px;
-}
-
-/* Samples Dropdown */
-.samples-dropdown {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: calc(100% + 6px);
-  right: 0;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 6px;
-  min-width: 270px;
-  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.4);
-  z-index: 50;
-  display: none;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.dropdown-menu.show {
-  display: flex;
-}
-
-.dropdown-item {
-  background: transparent;
-  border: none;
-  padding: 8px 12px;
-  color: var(--text);
-  font-size: 0.8rem;
-  text-align: left;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.15s ease;
-  font-family: inherit;
-}
-
-.dropdown-item:hover {
-  background: var(--pill-bg);
-  color: var(--pill-active-text);
-}
-
-/* Text Editor */
-.editor-body {
-  position: relative;
-  display: flex;
-  flex: 1;
-}
-
-#story-text {
-  width: 100%;
-  min-height: 380px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 18px;
-  color: var(--text);
-  font-family: 'Plus Jakarta Sans', sans-serif;
-  font-size: 0.92rem;
-  line-height: 1.7;
-  resize: vertical;
-  transition: border-color 0.2s ease;
-}
-
-#story-text:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
-}
-
-.editor-footer {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex-wrap: wrap;
-}
-
-.stat-pill {
-  background: var(--stat-bg);
-  border: 1px solid var(--border);
-  padding: 6px 14px;
-  border-radius: 999px;
-  font-size: 0.78rem;
-  display: flex;
-  gap: 6px;
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.stat-label {
-  color: var(--text-dim);
-}
-
-.stat-value {
-  color: var(--text);
-  font-weight: 600;
-}
-
-.stat-pill.highlight {
-  border-color: var(--accent-border);
-  background: var(--accent-subtle);
-}
-
-.stat-pill.highlight .stat-value {
-  color: var(--accent-light);
-}
-
-/* Options Bar */
-.options-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  padding: 12px 18px;
-  border-radius: 14px;
-  flex-wrap: wrap;
-}
-
-.option-item {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  flex: 1;
-  min-width: 200px;
-}
-
-.option-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.78rem;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.option-checkbox {
-  display: flex;
-  align-items: center;
-}
-
-.checkbox-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  user-select: none;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-.checkbox-container input {
-  display: none;
-}
-
-.checkmark {
-  width: 16px;
-  height: 16px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: var(--stat-bg);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.checkbox-container input:checked ~ .checkmark {
-  background: var(--accent);
-  border-color: var(--accent);
-}
-
-.checkmark:after {
-  content: "";
-  display: none;
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  margin-top: -1px;
-}
-
-.checkbox-container input:checked ~ .checkmark:after {
-  display: block;
-}
-
-/* -------------------------------------------------------------------------- */
-/* 5. VOICE & CHARACTER STUDIO                                                */
-/* -------------------------------------------------------------------------- */
-
-.section-label {
-  font-size: 0.7rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  color: var(--text-dim);
-  text-transform: uppercase;
-  margin-top: 2px;
-}
-
-.voice-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 10px;
-  max-height: 290px;
-  overflow-y: auto;
-  padding-right: 4px;
-}
 
 .voice-card-item {
   background: var(--input-bg);
@@ -671,7 +158,7 @@ body {
   overflow: hidden;
 }
 
-/* Emotion Pills (Pill shapes from screenshot) */
+/* Emotion Pills (Dynamic JS buttons) */
 .emotion-pills {
   display: flex;
   flex-wrap: wrap;
@@ -681,11 +168,10 @@ body {
 .emotion-pill {
   background: var(--pill-bg);
   border: 1px solid var(--border);
-  padding: 6px 14px;
+  padding: 5px 13px;
   border-radius: 999px;
   font-size: 0.75rem;
   color: var(--pill-text);
-  font-family: inherit;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -693,7 +179,6 @@ body {
 
 .emotion-pill:hover {
   background: var(--pill-hover);
-  color: #fff;
 }
 
 .emotion-pill.active {
@@ -703,314 +188,7 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Sliders */
-.sliders-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  padding: 16px;
-  border-radius: 14px;
-}
-
-.slider-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.slider-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.78rem;
-}
-
-.slider-title {
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.slider-val {
-  color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-input[type="range"] {
-  -webkit-appearance: none;
-  width: 100%;
-  height: 6px;
-  background: var(--slider-track);
-  border-radius: 999px;
-  outline: none;
-}
-
-input[type="range"]::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: var(--slider-thumb);
-  cursor: pointer;
-  transition: transform 0.1s ease, box-shadow 0.1s ease;
-  box-shadow: 0 0 6px var(--slider-thumb-shadow);
-}
-
-input[type="range"]::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-  box-shadow: 0 0 10px var(--slider-thumb-shadow);
-}
-
-/* Buttons */
-.btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 10px 18px;
-  border-radius: 999px;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
-  text-decoration: none;
-}
-
-.btn-sm {
-  padding: 6px 14px;
-  font-size: 0.78rem;
-  border-radius: 999px;
-}
-
-.btn-primary {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.btn-primary:hover {
-  background: var(--btn-primary-hover);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
-.btn-secondary {
-  background: var(--btn-secondary-bg);
-  border-color: var(--btn-secondary-border);
-  color: var(--btn-secondary-text);
-}
-
-.btn-secondary:hover {
-  background: var(--card-hover);
-  border-color: var(--border-focus);
-}
-
-.btn-circle {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-circle:hover {
-  transform: scale(1.05);
-}
-
-.action-row {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 12px;
-  margin-top: 4px;
-}
-
-/* -------------------------------------------------------------------------- */
-/* 6. PROGRESS CARD OVERLAY                                                  */
-/* -------------------------------------------------------------------------- */
-
-.progress-card {
-  position: fixed;
-  bottom: 100px;
-  right: 28px;
-  background: var(--card);
-  border: 1px solid var(--border-focus);
-  border-radius: 20px;
-  padding: 16px 20px;
-  width: 360px;
-  box-shadow: var(--shadow-card);
-  z-index: 100;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  animation: slideUp 0.3s ease;
-}
-
-@keyframes slideUp {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-.progress-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.progress-info {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.progress-title {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.progress-badge {
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.78rem;
-  color: var(--accent-light);
-  font-weight: 700;
-}
-
-.progress-track {
-  width: 100%;
-  height: 6px;
-  background: var(--progress-track);
-  border-radius: 999px;
-  overflow: hidden;
-}
-
-.progress-fill {
-  height: 100%;
-  background: var(--progress-fill);
-  transition: width 0.3s ease;
-}
-
-.progress-subtext {
-  font-size: 0.72rem;
-  color: var(--text-dim);
-}
-
-.spinner {
-  width: 14px;
-  height: 14px;
-  border: 2px solid rgba(255, 255, 255, 0.2);
-  border-top-color: var(--accent);
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}
-
-/* -------------------------------------------------------------------------- */
-/* 7. MASTER AUDIO PLAYER                                                     */
-/* -------------------------------------------------------------------------- */
-
-.master-player {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--player-bg);
-  backdrop-filter: blur(16px);
-  border-top: 1px solid var(--player-border);
-  padding: 12px 28px;
-  z-index: 90;
-  box-shadow: 0 -8px 30px rgba(0, 0, 0, 0.2);
-  animation: slideInPlayer 0.3s ease;
-}
-
-@keyframes slideInPlayer {
-  from { transform: translateY(100%); }
-  to { transform: translateY(0); }
-}
-
-.player-container {
-  max-width: 1440px;
-  margin: 0 auto;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 24px;
-}
-
-.player-track-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  min-width: 220px;
-}
-
-.player-icon {
-  width: 38px;
-  height: 38px;
-  background: var(--pill-bg);
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--pill-text);
-}
-
-.player-title {
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.player-meta {
-  font-size: 0.72rem;
-  color: var(--text-muted);
-  font-family: 'JetBrains Mono', monospace;
-}
-
-.player-controls {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  flex: 1;
-  max-width: 700px;
-}
-
-.player-scrubber {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  flex: 1;
-}
-
-.time-label {
-  font-size: 0.75rem;
-  color: var(--text-dim);
-  font-family: 'JetBrains Mono', monospace;
-  min-width: 40px;
-}
-
-.player-speed-pills {
-  display: flex;
-  gap: 4px;
-  background: var(--tab-container-bg);
-  padding: 3px;
-  border-radius: 999px;
-  border: 1px solid var(--border);
-}
-
+/* Speed Pills in Player */
 .speed-pill {
   background: transparent;
   border: none;
@@ -1031,162 +209,158 @@ input[type="range"]::-webkit-slider-thumb:hover {
   background: var(--card);
   color: var(--text);
   font-weight: 600;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
 }
 
-.player-actions {
+/* Engine Tabs Active State */
+.engine-tab {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.hidden {
-  display: none !important;
-}
-
-/* -------------------------------------------------------------------------- */
-/* 8. 4-ENGINE EXTENSIONS (ChatTTS & F5-TTS)                                 */
-/* -------------------------------------------------------------------------- */
-
-/* Badges for ChatTTS and F5-TTS */
-.tab-badge.chat-badge {
-  color: #fb923c;
-}
-.engine-tab.active .tab-badge.chat-badge {
-  background: rgba(251, 146, 60, 0.15);
-  border-color: rgba(251, 146, 60, 0.4);
-}
-
-.tab-badge.clone-badge {
-  color: #a855f7;
-}
-.engine-tab.active .tab-badge.clone-badge {
-  background: rgba(168, 85, 247, 0.15);
-  border-color: rgba(168, 85, 247, 0.4);
-}
-
-/* ChatTTS Narrative Token Bar */
-.token-bar {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  padding: 8px 14px;
-  border-radius: 12px;
-  margin-bottom: -6px;
-}
-
-.token-bar-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--text-muted);
-}
-
-.token-btn {
-  background: var(--pill-bg);
-  color: var(--pill-text);
-  border: 1px solid var(--border);
-  padding: 4px 12px;
+  padding: 6px 16px;
   border-radius: 999px;
-  font-size: 0.75rem;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-size: 0.82rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.2s ease;
 }
 
-.token-btn:hover {
-  background: var(--pill-hover);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-/* Custom Control Boxes (ChatTTS & F5-TTS) */
-.custom-control-box {
-  background: var(--input-bg);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.seed-control-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-@media (max-width: 600px) {
-  .seed-control-row {
-    grid-template-columns: 1fr;
-  }
-}
-
-.seed-input-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.seed-input-wrap {
-  display: flex;
-  gap: 6px;
-}
-
-.seed-input-wrap input {
-  flex: 1;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 6px 10px;
+.engine-tab:hover {
   color: var(--text);
-  font-family: 'JetBrains Mono', monospace;
-  font-size: 0.85rem;
 }
 
-.chat-sliders-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
-}
-
-/* F5-TTS Upload Area */
-.f5-upload-area {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-.f5-upload-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.f5-upload-group input[type="file"] {
+.engine-tab.active {
   background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 0.78rem;
+  color: var(--text);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.engine-tab.active .tab-badge {
+  background: rgba(255, 255, 255, 0.12);
+  color: var(--accent-light);
+}
+
+.engine-tab.active .tab-badge.local-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34d399;
+}
+
+.engine-tab.active .tab-badge.chat-badge {
+  background: rgba(251, 146, 60, 0.15);
+  color: #fb923c;
+}
+
+.engine-tab.active .tab-badge.clone-badge {
+  background: rgba(168, 85, 247, 0.15);
+  color: #c084fc;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 4. RANGE SLIDERS & CHECKBOX                                                */
+/* -------------------------------------------------------------------------- */
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  background: var(--slider-track);
+  border-radius: 999px;
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--slider-thumb);
+  cursor: pointer;
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  box-shadow: 0 0 6px var(--slider-thumb-shadow);
+}
+
+input[type="range"]::-webkit-slider-thumb:hover {
+  transform: scale(1.18);
+}
+
+/* Custom Checkbox */
+.checkbox-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  user-select: none;
+  font-size: 0.8rem;
   color: var(--text-muted);
-  width: 100%;
 }
 
-.f5-ref-text-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
+.checkbox-container input {
+  display: none;
 }
 
-.f5-ref-text-group input[type="text"] {
-  background: var(--card);
+.checkmark {
+  width: 16px;
+  height: 16px;
   border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  color: var(--text);
-  font-size: 0.85rem;
-  width: 100%;
+  border-radius: 4px;
+  background: var(--stat-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 
+.checkbox-container input:checked ~ .checkmark {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.checkmark:after {
+  content: "";
+  display: none;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -1px;
+}
+
+.checkbox-container input:checked ~ .checkmark:after {
+  display: block;
+}
+
+/* -------------------------------------------------------------------------- */
+/* 5. ANIMATIONS & DROPDOWN                                                   */
+/* -------------------------------------------------------------------------- */
+
+.dropdown-menu.show {
+  display: flex !important;
+}
+
+.spinner {
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease;
+}
