@@ -6,12 +6,13 @@
 const STATE = {
   theme: 'dark',
   engine: 'edge', // 'edge' | 'kokoro' | 'chattts' | 'f5'
+  selectedLang: 'all', // 'all' | 'en' | 'fr' | 'ru'
   edgeVoices: [],
   kokoroVoices: [],
   chatttsVoices: [],
   f5ttsVoices: [],
   selectedVoice: null,
-  selectedStyle: 'narration-relaxed',
+  selectedStyle: 'default',
   f5CustomAudioPath: null,
   isGenerating: false,
   taskId: null,
@@ -32,11 +33,13 @@ Commander Vance initiated the subspace sensor sweep. For six standard months, th
 
 "Sensors are locking on," the AI announced, its synthetic voice calm despite the immense gravity well pulling at their shields. "Whatever built this station... it has just detected our approach."`,
 
-  fantasy: `High above the Mistveil Valley, the stone spires of the Forgotten Citadel pierced the twilight sky. Legends spoke of the Ember Crown—an artifact forged in the first fires of creation, said to grant its bearer dominion over both shadow and flame.
+  french: `Dans la pénombre du vieux manoir, une horloge ancienne sonna les douze coups de minuit. Au dehors, le vent d'automne gémissait contre les vitraux, balayant la forêt silencieuse de feuilles d'or.
 
-Lady Kimberly pulled her velvet cloak tighter against the mountain frost as she approached the ruined archway. In her palm, the glowing runestone pulsed with a warm, amber light, illuminating the ancient glyphs carved into the granite pillars. 
+Henri s'avança lentement au bout de la grande galerie de chêne. La vieille porte sculptée au fond du couloir semblait vibrer d'un mystérieux battement régulier, comme le murmure d'un secret endormi depuis plusieurs siècles. Il s'approcha, le cœur battant, et entendit le grincement discret d'une clé tournant lentement dans la serrure.`,
 
-Suddenly, a flock of white ravens burst from the bell tower, scattering into the darkening clouds. A deep, melodic chant echoed from the abyss beneath the altar, carrying the forgotten words of a kingdom that vanished a thousand years ago.`
+  russian: `Старинные башенные часы пробили полночь, и их гулкий бой прокатился по пустынным залам старинного поместья. За высокими окнами бушевала осенняя буря, срывая последние золотые листья с вековых дубов.
+
+Дмитрий стоял у винтовой дубовой лестницы, держа в руках старинный фонарь. Он помнил строгое предостережение никогда не оставаться в усадьбе после заката. Но массивная резная дверь в конце галереи словно притягивала его к себе таинственным, едва уловимым шёпотом.`
 };
 
 // DOM Elements
@@ -47,6 +50,7 @@ const tabF5 = document.getElementById('tab-f5');
 
 const voiceGrid = document.getElementById('voice-grid');
 const voiceGridLabel = document.getElementById('voice-grid-label');
+const langPillsBar = document.getElementById('lang-pills-bar');
 const emotionSection = document.getElementById('emotion-section');
 const emotionPills = document.getElementById('emotion-pills');
 const intensityGroup = document.getElementById('intensity-group');
@@ -173,6 +177,17 @@ function setupEventListeners() {
   tabKokoro.addEventListener('click', () => switchEngine('kokoro'));
   tabChattts.addEventListener('click', () => switchEngine('chattts'));
   tabF5.addEventListener('click', () => switchEngine('f5'));
+
+  // Language Filter Pills
+  document.querySelectorAll('.lang-pill').forEach(pill => {
+    pill.addEventListener('click', (e) => {
+      document.querySelectorAll('.lang-pill').forEach(p => p.classList.remove('active'));
+      const btn = e.target.closest('.lang-pill');
+      btn.classList.add('active');
+      STATE.selectedLang = btn.dataset.lang;
+      renderVoiceGrid();
+    });
+  });
 
   // Story Text Updates
   storyText.addEventListener('input', updateTextStats);
@@ -349,11 +364,12 @@ function switchEngine(engine) {
     chatttsTokenBar.classList.add('hidden');
     chatttsControls.classList.add('hidden');
     f5ttsControls.classList.add('hidden');
-    emotionSection.classList.remove('hidden');
-    intensityGroup.classList.remove('hidden');
+    emotionSection.classList.add('hidden'); // Edge neural uses direct modulation
+    intensityGroup.classList.add('hidden');
     pitchGroup.classList.remove('hidden');
+    if (langPillsBar) langPillsBar.classList.remove('hidden');
     voiceGridLabel.textContent = 'SELECT NARRATOR VOICE';
-    engineDesc.textContent = 'Edge-TTS: Cloud Neural voices with express-as SSML styles and lightning-fast rendering.';
+    engineDesc.textContent = 'Edge-TTS: Advanced Neural Multilingual models (English, French, Russian) with crystal clarity.';
   } else if (engine === 'kokoro') {
     tabKokoro.classList.add('active');
     chatttsTokenBar.classList.add('hidden');
@@ -362,8 +378,9 @@ function switchEngine(engine) {
     emotionSection.classList.add('hidden');
     intensityGroup.classList.add('hidden');
     pitchGroup.classList.add('hidden');
+    if (langPillsBar) langPillsBar.classList.remove('hidden');
     voiceGridLabel.textContent = 'SELECT KOKORO-82M VOICE';
-    engineDesc.textContent = 'Kokoro-82M: Local 82M parameter StyleTTS2 model with human-grade rhythm and cadence.';
+    engineDesc.textContent = 'Kokoro-82M: Local 82M parameter StyleTTS2 model with studio human cadence (English, French).';
   } else if (engine === 'chattts') {
     tabChattts.classList.add('active');
     chatttsTokenBar.classList.remove('hidden');
@@ -372,6 +389,7 @@ function switchEngine(engine) {
     emotionSection.classList.add('hidden');
     intensityGroup.classList.add('hidden');
     pitchGroup.classList.add('hidden');
+    if (langPillsBar) langPillsBar.classList.add('hidden');
     voiceGridLabel.textContent = 'SELECT CHATTTS SPEAKER PRESET';
     engineDesc.textContent = 'ChatTTS: Conversational & Storytelling AI with realistic laughter, sighs, and oral breathing.';
   } else if (engine === 'f5') {
@@ -382,6 +400,7 @@ function switchEngine(engine) {
     emotionSection.classList.add('hidden');
     intensityGroup.classList.add('hidden');
     pitchGroup.classList.add('hidden');
+    if (langPillsBar) langPillsBar.classList.add('hidden');
     voiceGridLabel.textContent = 'SELECT REFERENCE VOICE (OR UPLOAD YOUR OWN)';
     engineDesc.textContent = 'F5-TTS: Zero-Shot Diffusion Voice Cloning from 5-10 second reference audio samples.';
   }
@@ -399,8 +418,17 @@ function renderVoiceGrid() {
   else if (STATE.engine === 'chattts') voices = STATE.chatttsVoices;
   else if (STATE.engine === 'f5') voices = STATE.f5ttsVoices;
 
+  // Filter by selected language if not 'all'
+  if (STATE.selectedLang !== 'all' && (STATE.engine === 'edge' || STATE.engine === 'kokoro')) {
+    voices = voices.filter(v => {
+      const vLang = (v.language || '').toLowerCase();
+      const vLocale = (v.locale || '').toLowerCase();
+      return vLang === STATE.selectedLang || vLocale.startsWith(STATE.selectedLang);
+    });
+  }
+
   if (!voices.length) {
-    voiceGrid.innerHTML = '<div style="color:var(--text-muted);font-size:0.8rem;">No voices available.</div>';
+    voiceGrid.innerHTML = '<div class="col-span-2 py-8 text-center text-zinc-500 text-xs">No voices available for this language selection.</div>';
     return;
   }
 
@@ -504,15 +532,23 @@ async function auditionVoicePreview() {
   btnPreview.disabled = true;
   previewText.textContent = 'Generating...';
 
+  // Use user's written prompt if available in the story editor, else fallback to voice sample_text
+  let promptText = STATE.selectedVoice.sample_text || 'The silent corridor stretched endlessly into the shadows of the old manor.';
+  const userText = storyText.value.trim();
+  if (userText.length > 0) {
+    const sentences = userText.split(/(?<=[.!?…\n])\s+/).filter(Boolean);
+    promptText = sentences.length > 0 ? sentences[0].slice(0, 250) : userText.slice(0, 250);
+  }
+
   try {
     const payload = {
       engine: STATE.engine,
       voice_id: STATE.selectedVoice.id,
-      style: STATE.selectedStyle,
+      style: STATE.selectedStyle || 'default',
       style_degree: parseFloat(intensitySlider.value),
       rate: parseInt(speedSlider.value),
       pitch: parseInt(pitchSlider.value),
-      text: STATE.selectedVoice.sample_text || 'The silent corridor stretched endlessly into the shadows of the old manor.',
+      text: promptText,
       chat_seed: parseInt(chatSeedInput.value) || 42,
       chat_temp: parseFloat(tempSlider.value),
       chat_oral: parseInt(oralSlider.value),

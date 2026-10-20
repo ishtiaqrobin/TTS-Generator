@@ -125,9 +125,10 @@
               Load Sample
             </button>
             <div class="dropdown-menu absolute top-full right-0 mt-1.5 bg-white dark:bg-[#252627] border border-zinc-200 dark:border-white/10 rounded-xl p-1.5 min-w-[270px] shadow-2xl z-50 hidden flex-col gap-1" id="samples-menu">
-              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="horror">Midnight in Blackwood Manor (Horror/Mystery)</button>
-              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="scifi">The Chrono Voyager (Sci-Fi Odyssey)</button>
-              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="fantasy">The Whispering Forest (Dark Fantasy)</button>
+              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="horror">🇺🇸 Midnight in Blackwood Manor (Horror)</button>
+              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="scifi">🇺🇸 The Chrono Voyager (Sci-Fi Odyssey)</button>
+              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="french">🇫🇷 Le Mystère du Château Noir (French)</button>
+              <button class="dropdown-item w-full text-left px-3 py-2 text-xs rounded-lg text-zinc-700 dark:text-zinc-200 hover:bg-red-50 hover:text-red-600 dark:hover:bg-[#4f5152] dark:hover:text-white transition-all" data-sample="russian">🇷🇺 Тайна Старого Замка (Russian Story)</button>
             </div>
           </div>
         </div>
@@ -187,8 +188,16 @@ Over many a quaint and curious volume of forgotten lore..."></textarea>
           <p class="text-xs text-zinc-500 dark:text-[#a6a8a9] mt-0.5" id="engine-desc">Select voice archetype and fine-tune emotion, pitch, and pacing.</p>
         </div>
 
-        <!-- Voice Selection Grid -->
-        <div class="text-[11px] font-bold tracking-wider text-zinc-500 dark:text-[#797b7d] uppercase" id="voice-grid-label">SELECT NARRATOR VOICE</div>
+        <!-- Language Selector Filter Bar -->
+        <div class="flex items-center justify-between gap-2 flex-wrap" id="lang-selector-container">
+          <div class="text-[11px] font-bold tracking-wider text-zinc-500 dark:text-[#797b7d] uppercase" id="voice-grid-label">SELECT NARRATOR VOICE</div>
+          <div class="flex items-center gap-1 bg-zinc-100 dark:bg-[#1b1c1d] border border-zinc-200 dark:border-white/10 p-0.5 rounded-full text-xs" id="lang-pills-bar">
+            <button type="button" class="lang-pill active px-2.5 py-0.5 rounded-full font-semibold transition-all text-xs cursor-pointer" data-lang="all">🌐 All</button>
+            <button type="button" class="lang-pill px-2.5 py-0.5 rounded-full font-semibold transition-all text-xs cursor-pointer" data-lang="en">🇺🇸 EN</button>
+            <button type="button" class="lang-pill px-2.5 py-0.5 rounded-full font-semibold transition-all text-xs cursor-pointer" data-lang="fr">🇫🇷 FR</button>
+            <button type="button" class="lang-pill px-2.5 py-0.5 rounded-full font-semibold transition-all text-xs cursor-pointer" data-lang="ru">🇷🇺 RU</button>
+          </div>
+        </div>
         <div class="voice-grid grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[290px] overflow-y-auto pr-1" id="voice-grid">
           <!-- Voice cards injected via JS -->
         </div>

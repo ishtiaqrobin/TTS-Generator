@@ -84,7 +84,8 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--accent);
+  /* background: var(--accent); */
+  background: var(--text-muted);
   border-radius: 999px;
 }
 
@@ -113,7 +114,7 @@ body {
 .voice-card-item.selected {
   background: var(--card-selected);
   border-color: var(--accent);
-  box-shadow: 0 0 0 1px var(--accent);
+  /* box-shadow: 0 0 0 1px var(--accent); */
 }
 
 .voice-card-top {
@@ -185,7 +186,7 @@ body {
   background: var(--pill-active-bg);
   border-color: var(--accent);
   color: var(--pill-active-text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
 }
 
 /* Speed Pills in Player */
@@ -209,7 +210,24 @@ body {
   background: var(--card);
   color: var(--text);
   font-weight: 600;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+  /* box-shadow: 0 1px 4px rgba(0,0,0,0.1); */
+}
+
+/* Language Filter Pills */
+.lang-pill {
+  color: var(--text-muted);
+  background: transparent;
+  border: none;
+}
+
+.lang-pill:hover {
+  color: var(--text);
+}
+
+.lang-pill.active {
+  background: var(--card);
+  color: var(--text);
+  font-weight: 600;
 }
 
 /* Engine Tabs Active State */
@@ -235,7 +253,7 @@ body {
 .engine-tab.active {
   background: var(--card);
   color: var(--text);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15); */
 }
 
 .engine-tab.active .tab-badge {
@@ -281,7 +299,7 @@ input[type="range"]::-webkit-slider-thumb {
   background: var(--slider-thumb);
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
-  box-shadow: 0 0 6px var(--slider-thumb-shadow);
+  /* box-shadow: 0 0 6px var(--slider-thumb-shadow); */
 }
 
 input[type="range"]::-webkit-slider-thumb:hover {

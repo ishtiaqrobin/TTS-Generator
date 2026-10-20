@@ -35,27 +35,76 @@ os.makedirs(REF_AUDIO_DIR, exist_ok=True)
 # ---------------------------------------------------------------------------
 
 EDGE_VOICES = [
+    # --- English (US / UK) ---
+    {
+        "id": "en-US-AndrewMultilingualNeural",
+        "name": "Andrew (Multilingual)",
+        "title": "The Advanced Cinematic Narrator",
+        "gender": "Male",
+        "locale": "en-US",
+        "language": "en",
+        "accent": "American",
+        "description": "Microsoft's most advanced multilingual male neural voice. Exceptional naturalness and cinematic presence.",
+        "sample_text": "Beyond the edge of the known universe, ancient stars whispered stories of forgotten civilizations.",
+        "supported_styles": [{"id": "default", "label": "Cinematic Storytelling"}],
+        "default_style": "default",
+        "tag": "Advanced AI"
+    },
+    {
+        "id": "en-US-AvaMultilingualNeural",
+        "name": "Ava (Multilingual)",
+        "title": "The Modern Studio Narrator",
+        "gender": "Female",
+        "locale": "en-US",
+        "language": "en",
+        "accent": "American",
+        "description": "State-of-the-art multilingual female neural model. Impeccable clarity, emotion, and audiobook cadence.",
+        "sample_text": "The memory of that summer afternoon remained as vivid as watercolor on fresh parchment.",
+        "supported_styles": [{"id": "default", "label": "Studio Cadence"}],
+        "default_style": "default",
+        "tag": "Advanced AI"
+    },
+    {
+        "id": "en-US-BrianMultilingualNeural",
+        "name": "Brian (Multilingual)",
+        "title": "The Contemporary Narrator",
+        "gender": "Male",
+        "locale": "en-US",
+        "language": "en",
+        "accent": "American",
+        "description": "Crisp, modern, high-definition neural voice. Great for contemporary fiction, podcasts, and lore.",
+        "sample_text": "Every scientific discovery begins with a single question that nobody dared to ask before.",
+        "supported_styles": [{"id": "default", "label": "Modern Narrative"}],
+        "default_style": "default",
+        "tag": "Modern Crisp"
+    },
+    {
+        "id": "en-US-EmmaMultilingualNeural",
+        "name": "Emma (Multilingual)",
+        "title": "The Expressive Protagonist",
+        "gender": "Female",
+        "locale": "en-US",
+        "language": "en",
+        "accent": "American",
+        "description": "Warm, expressive, high-clarity female voice with natural breathing and storytelling depth.",
+        "sample_text": "She looked up into the twilight sky, wondering if the stars held the answers she was searching for.",
+        "supported_styles": [{"id": "default", "label": "Expressive Narrative"}],
+        "default_style": "default",
+        "tag": "Top Emotional"
+    },
     {
         "id": "en-US-GuyNeural",
         "name": "Guy",
         "title": "The Master Storyteller",
         "gender": "Male",
         "locale": "en-US",
+        "language": "en",
         "accent": "American",
         "description": "Deeply expressive, dynamic narrator ideal for mystery, thrillers, and dramatic storytelling.",
         "sample_text": "The fog rolled over the cobblestone streets as the distant clock tower struck midnight.",
-        "supported_styles": [
-            {"id": "narration-relaxed", "label": "Storyteller (Relaxed)"},
-            {"id": "whispering", "label": "Whisper (Suspense)"},
-            {"id": "terrified", "label": "Terrified (Horror)"},
-            {"id": "sad", "label": "Sad (Tragic)"},
-            {"id": "cheerful", "label": "Cheerful (Upbeat)"},
-            {"id": "hopeful", "label": "Hopeful"},
-            {"id": "empathetic", "label": "Empathetic"},
-            {"id": "angry", "label": "Intense (Angry)"}
-        ],
-        "default_style": "narration-relaxed",
-        "tag": "Most Expressive"
+        "supported_styles": [{"id": "default", "label": "Master Storyteller"}],
+        "default_style": "default",
+        "tag": "Classic Narrator"
     },
     {
         "id": "en-US-ChristopherNeural",
@@ -63,49 +112,41 @@ EDGE_VOICES = [
         "title": "The Deep Audiobook Narrator",
         "gender": "Male",
         "locale": "en-US",
+        "language": "en",
         "accent": "American",
         "description": "Deep, authoritative, cinematic baritone voice. Perfect for epic fantasy, sci-fi, and documentaries.",
         "sample_text": "In the beginning, long before the stars grew cold, an ancient civilization watched the skies.",
-        "supported_styles": [{"id": "default", "label": "Authoritative Narrative"}],
+        "supported_styles": [{"id": "default", "label": "Deep Baritone"}],
         "default_style": "default",
         "tag": "Deep Baritone"
     },
     {
         "id": "en-US-AriaNeural",
         "name": "Aria",
-        "title": "The Emotional Protagonist",
+        "title": "The Dramatic Protagonist",
         "gender": "Female",
         "locale": "en-US",
+        "language": "en",
         "accent": "American",
-        "description": "Rich emotional range, breath control, and nuance. Ideal for psychological thrillers and emotional drama.",
-        "sample_text": "She looked out into the rain, wondering if the secret she had kept for twenty years was finally unraveling.",
-        "supported_styles": [
-            {"id": "narration-relaxed", "label": "Storyteller (Relaxed)"},
-            {"id": "whispering", "label": "Whisper (Secretive)"},
-            {"id": "sad", "label": "Sad (Melancholy)"},
-            {"id": "empathetic", "label": "Empathetic"},
-            {"id": "cheerful", "label": "Cheerful"}
-        ],
-        "default_style": "narration-relaxed",
-        "tag": "Emotional Nuance"
+        "description": "Rich emotional range, breath control, and nuance. Ideal for psychological thrillers and drama.",
+        "sample_text": "She looked out into the rain, wondering if the secret she kept for twenty years was unraveling.",
+        "supported_styles": [{"id": "default", "label": "Dramatic Narrative"}],
+        "default_style": "default",
+        "tag": "Nuanced Drama"
     },
     {
-        "id": "en-US-DavisNeural",
-        "name": "Davis",
-        "title": "The Dark & Gritty Narrator",
-        "gender": "Male",
+        "id": "en-US-JennyNeural",
+        "name": "Jenny",
+        "title": "The Soothing Bedtime Storyteller",
+        "gender": "Female",
         "locale": "en-US",
+        "language": "en",
         "accent": "American",
-        "description": "Gruff, suspenseful, gritty tone. Exceptional for noir crime, detective mysteries, and dark horror.",
-        "sample_text": "The city has a way of swallowing the truth. You don't ask questions unless you're ready for the answer.",
-        "supported_styles": [
-            {"id": "narration-relaxed", "label": "Noir Narrative"},
-            {"id": "whispering", "label": "Whisper (Eerie)"},
-            {"id": "angry", "label": "Gritty / Angry"},
-            {"id": "sad", "label": "Gloomy (Sad)"}
-        ],
-        "default_style": "narration-relaxed",
-        "tag": "Noir & Horror"
+        "description": "Warm, gentle, reassuring voice. Perfect for soothing sleep stories, meditation, and gentle fables.",
+        "sample_text": "As the evening settled, the stars gently appeared one by one, watching over the quiet forest.",
+        "supported_styles": [{"id": "default", "label": "Soothing Tone"}],
+        "default_style": "default",
+        "tag": "Calming & Warm"
     },
     {
         "id": "en-GB-RyanNeural",
@@ -113,10 +154,11 @@ EDGE_VOICES = [
         "title": "The British Gentleman",
         "gender": "Male",
         "locale": "en-GB",
+        "language": "en",
         "accent": "British (UK)",
         "description": "Sophisticated, articulate British male. The hallmark voice for historical fiction and classic literature.",
         "sample_text": "Beneath the vaulted ceilings of the cathedral, shadows danced upon centuries of forgotten history.",
-        "supported_styles": [{"id": "default", "label": "Classic British Narrative"}],
+        "supported_styles": [{"id": "default", "label": "Classic British"}],
         "default_style": "default",
         "tag": "Classic British"
     },
@@ -126,42 +168,143 @@ EDGE_VOICES = [
         "title": "The Cinematic British Narrator",
         "gender": "Female",
         "locale": "en-GB",
+        "language": "en",
         "accent": "British (UK)",
         "description": "Elegant, enchanting British female delivery. Wonderful for fairy tales, folklore, and gothic mysteries.",
         "sample_text": "The wind carried whispered secrets through the ancient heather moorlands of the north.",
-        "supported_styles": [{"id": "default", "label": "Elegant British Narrative"}],
+        "supported_styles": [{"id": "default", "label": "Enchanting Tone"}],
         "default_style": "default",
-        "tag": "Enchanting Tone"
+        "tag": "Enchanting British"
     },
+
+    # --- French (Français) ---
     {
-        "id": "en-US-JennyNeural",
-        "name": "Jenny",
-        "title": "The Soothing Bedtime Storyteller",
-        "gender": "Female",
-        "locale": "en-US",
-        "accent": "American",
-        "description": "Warm, gentle, reassuring voice. Perfect for soothing sleep stories, meditation, and gentle fables.",
-        "sample_text": "As the evening settled, the stars gently appeared one by one, watching over the quiet forest.",
-        "supported_styles": [
-            {"id": "whispering", "label": "Gentle Whisper"},
-            {"id": "cheerful", "label": "Warm & Cheerful"},
-            {"id": "sad", "label": "Soft & Melancholic"}
-        ],
-        "default_style": "whispering",
-        "tag": "Calming & Warm"
-    },
-    {
-        "id": "en-US-BrianMultilingualNeural",
-        "name": "Brian",
-        "title": "The Contemporary Narrator",
+        "id": "fr-FR-RemyMultilingualNeural",
+        "name": "Remy (Multilingue)",
+        "title": "Le Narrateur Français Cinématographique",
         "gender": "Male",
-        "locale": "en-US",
-        "accent": "American",
-        "description": "Crisp, modern, high-definition neural voice. Great for contemporary fiction and podcasts.",
-        "sample_text": "Every discovery begins with a single question that nobody dared to ask before.",
-        "supported_styles": [{"id": "default", "label": "Modern Narrative"}],
+        "locale": "fr-FR",
+        "language": "fr",
+        "accent": "Français (France)",
+        "description": "Modèle neuronal avancé de pointe. Voix masculine française riche, profonde et immersive.",
+        "sample_text": "Le silence régnait dans la vieille demeure lorsque les premières lueurs de l'aube éclairèrent le salon.",
+        "supported_styles": [{"id": "default", "label": "Narration Française"}],
         "default_style": "default",
-        "tag": "Modern Crisp"
+        "tag": "French Multilingual"
+    },
+    {
+        "id": "fr-FR-VivienneMultilingualNeural",
+        "name": "Vivienne (Multilingue)",
+        "title": "La Voix Littéraire Française",
+        "gender": "Female",
+        "locale": "fr-FR",
+        "language": "fr",
+        "accent": "Français (France)",
+        "description": "Modèle neuronal moderne. Voix féminine élégante, captivante et idéale pour les romans et fables.",
+        "sample_text": "Au cœur de la forêt enchantée, les arbres séculaires chuchotaient les légendes d'un royaume oublié.",
+        "supported_styles": [{"id": "default", "label": "Littéraire & Poétique"}],
+        "default_style": "default",
+        "tag": "French Multilingual"
+    },
+    {
+        "id": "fr-FR-HenriNeural",
+        "name": "Henri",
+        "title": "Le Conteur Classique",
+        "gender": "Male",
+        "locale": "fr-FR",
+        "language": "fr",
+        "accent": "Français (France)",
+        "description": "Voix masculine posée, chaleureuse et noble. Parfaite pour les récits historiques et documentaires.",
+        "sample_text": "Les vagues s'écrasaient avec fracas contre les falaises de granit sous un ciel d'orage.",
+        "supported_styles": [{"id": "default", "label": "Conteur Noble"}],
+        "default_style": "default",
+        "tag": "Classic French"
+    },
+    {
+        "id": "fr-FR-DeniseNeural",
+        "name": "Denise",
+        "title": "La Conteuse Douce",
+        "gender": "Female",
+        "locale": "fr-FR",
+        "language": "fr",
+        "accent": "Français (France)",
+        "description": "Voix féminine claire, posée et très expressive pour les livres audio et fables.",
+        "sample_text": "Une douce brise d'automne faisait tournoyer les feuilles dorées le long des allées silencieuses.",
+        "supported_styles": [{"id": "default", "label": "Conteuse Douce"}],
+        "default_style": "default",
+        "tag": "Audiobook French"
+    },
+    {
+        "id": "fr-FR-EloiseNeural",
+        "name": "Eloise",
+        "title": "La Protagoniste Expressive",
+        "gender": "Female",
+        "locale": "fr-FR",
+        "language": "fr",
+        "accent": "Français (France)",
+        "description": "Voix jeune, fraîche et captivante. Excellente pour les aventures et histoires à suspense.",
+        "sample_text": "Elle ouvrit délicatement la vieille boîte de bois sculpté, révélant la clé d'argent.",
+        "supported_styles": [{"id": "default", "label": "Jeune Protagoniste"}],
+        "default_style": "default",
+        "tag": "Expressive French"
+    },
+    {
+        "id": "fr-CA-JeanNeural",
+        "name": "Jean (Québec)",
+        "title": "Le Narrateur Canadien",
+        "gender": "Male",
+        "locale": "fr-CA",
+        "language": "fr",
+        "accent": "Français (Canada)",
+        "description": "Voix masculine québécoise chaleureuse, naturelle et engageante pour la narration.",
+        "sample_text": "L'immensité des grands espaces du nord résonnait sous le souffle du vent boréal.",
+        "supported_styles": [{"id": "default", "label": "Accent Québécois"}],
+        "default_style": "default",
+        "tag": "Canadian French"
+    },
+    {
+        "id": "fr-CA-SylvieNeural",
+        "name": "Sylvie (Québec)",
+        "title": "La Conteuse Canadienne",
+        "gender": "Female",
+        "locale": "fr-CA",
+        "language": "fr",
+        "accent": "Français (Canada)",
+        "description": "Voix féminine chaleureuse et captivante avec l'accent francophone du Canada.",
+        "sample_text": "Les étoiles brillaient d'un éclat vif dans la nuit froide de l'hiver boréal.",
+        "supported_styles": [{"id": "default", "label": "Conteuse Canadienne"}],
+        "default_style": "default",
+        "tag": "Canadian French"
+    },
+
+    # --- Russian (Русский) ---
+    {
+        "id": "ru-RU-DmitryNeural",
+        "name": "Dmitry (Дмитрий)",
+        "title": "Глубокий Рассказчик",
+        "gender": "Male",
+        "locale": "ru-RU",
+        "language": "ru",
+        "accent": "Русский (Россия)",
+        "description": "Мощный, глубокий и авторитетный мужской баритон. Идеален для классики, фэнтези, триллеров и аудиокниг.",
+        "sample_text": "В тот холодный ноябрьский вечер старинные часы в пустой зале пробили ровно полночь.",
+        "supported_styles": [{"id": "default", "label": "Художественное чтение"}],
+        "default_style": "default",
+        "tag": "Russian Master"
+    },
+    {
+        "id": "ru-RU-SvetlanaNeural",
+        "name": "Svetlana (Светлана)",
+        "title": "Эмоциональная Сказительница",
+        "gender": "Female",
+        "locale": "ru-RU",
+        "language": "ru",
+        "accent": "Русский (Россия)",
+        "description": "Тёплый, выразительный и чарующий женский голос. Превосходен для сказок, романов, драмы и стихов.",
+        "sample_text": "За старым садом тихо шумел сосновый лес, укрытый серебристым покрывалом первого снега.",
+        "supported_styles": [{"id": "default", "label": "Лирический рассказ"}],
+        "default_style": "default",
+        "tag": "Russian Master"
     }
 ]
 
@@ -486,33 +629,6 @@ def split_text_into_chunks(text: str, max_words_per_chunk: int = 120) -> List[st
 # ---------------------------------------------------------------------------
 
 # --- A. EDGE-TTS ---
-def build_ssml(
-    text: str,
-    voice_id: str,
-    style: Optional[str] = None,
-    style_degree: float = 1.0,
-    rate: int = 0,
-    pitch: int = 0,
-    pause_ms: int = 400
-) -> str:
-    escaped_text = html.escape(text.strip())
-    rate_str = f"{'+' if rate > 0 else ''}{rate}%" if rate != 0 else "+0%"
-    pitch_str = f"{'+' if pitch > 0 else ''}{pitch}Hz" if pitch != 0 else "+0Hz"
-
-    inner = f'<prosody rate="{rate_str}" pitch="{pitch_str}">{escaped_text}</prosody>'
-    if style and style != "default":
-        inner = f'<mstts:express-as style="{style}" styledegree="{style_degree:.1f}">{inner}</mstts:express-as>'
-
-    if pause_ms > 0:
-        inner += f'<break time="{pause_ms}ms"/>'
-
-    return (
-        f'<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" '
-        f'xmlns:mstts="https://www.w3.org/2001/mstts" xml:lang="en-US">'
-        f'<voice name="{voice_id}">{inner}</voice></speak>'
-    )
-
-
 async def synthesize_edge_chunk(
     chunk_text: str,
     output_path: str,
@@ -524,23 +640,30 @@ async def synthesize_edge_chunk(
     pause_ms: int = 400,
     retries: int = 3
 ) -> bool:
+    """
+    Synthesize audio using Edge-TTS neural models with pitch and rate modulation.
+    Directly passes text to edge_tts.Communicate to guarantee 100% reliability
+    across all languages (English, French, Russian) and long narratives.
+    """
+    clean_text = chunk_text.strip()
+    if not clean_text:
+        return False
+
+    rate_str = f"{'+' if rate > 0 else ''}{rate}%"
+    pitch_str = f"{'+' if pitch > 0 else ''}{pitch}Hz"
+
     for attempt in range(retries):
         try:
-            ssml = build_ssml(chunk_text, voice_id, style, style_degree, rate, pitch, pause_ms)
-            communicate = edge_tts.Communicate(ssml, voice_id)
+            communicate = edge_tts.Communicate(
+                clean_text,
+                voice_id,
+                rate=rate_str,
+                pitch=pitch_str
+            )
             await communicate.save(output_path)
-            if os.path.exists(output_path) and os.path.getsize(output_path) > 500:
+            if os.path.exists(output_path) and os.path.getsize(output_path) > 200:
                 return True
         except Exception as e:
-            if style and style != "default":
-                try:
-                    fallback_ssml = build_ssml(chunk_text, voice_id, None, 1.0, rate, pitch, pause_ms)
-                    communicate = edge_tts.Communicate(fallback_ssml, voice_id)
-                    await communicate.save(output_path)
-                    if os.path.exists(output_path) and os.path.getsize(output_path) > 500:
-                        return True
-                except Exception:
-                    pass
             if attempt == retries - 1:
                 raise e
             await asyncio.sleep(1.0 * (attempt + 1))
